@@ -2,4 +2,4 @@
 
 2. Python 2.6 or 2.7 (not Python3)
 
-4. If you want YSmart to compile and execute translated MapReduce jobs, Hadoop 0.20.x or 0.21.x must be installed and HADOOP_HOME must be set.
+3. If you want YSmart to compile and execute translated MapReduce jobs, Java 1.6 and Hadoop 0.20.x or 0.21.x must be installed and HADOOP_HOME must be set.
