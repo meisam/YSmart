@@ -134,10 +134,18 @@ class Test(unittest.TestCase):
     def testSSb4_2Parser(self):
         self.sql2XmlTestScaffold("ssb_test/q4_2.sql") 
 
-    def testSSb4_3Parser(self):
-        self.sql2XmlTestScaffold("ssb_test/q4_3.sql") 
+    ############# tests that exposes bugs in YSmart
+    def testKeyword_UidParser(self):
+        self.sql2XmlTestScaffold("untit_tests/keywords_uid.sql") 
 
+    def testKeyword_StartParser(self):
+        self.sql2XmlTestScaffold("untit_tests/keywords_start.sql") 
 
+    def testKeyword_SizeParser(self):
+        self.sql2XmlTestScaffold("untit_tests/keywords_size.sql") 
+
+    #################################
+    
     def sql2XmlTestScaffold(self, inputFileName):
         '''
         Parses the given SQL file and compares the parse tree with the expected parse tree

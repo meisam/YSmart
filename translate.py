@@ -24,6 +24,8 @@ import sys;
 
 sys.path.append("SQL2XML") 
 import sql2xml
+sys.path.append("XML2MapReduce")
+import code_gen 
 
 CURRENT_DIR = os.getcwd();
 EXEC_DIR = 'bin';
@@ -41,11 +43,19 @@ def genXMLTree(queryFile, tmpFilePath):
             outputFile.write(xmlStr)
 
 def genHadoopJobs(schemaFile, tmpFilePath, queryName, queryInputPath, queryOutputPath):
-	#print 'TODO: call job generation program in ./bin/';
-	os.chdir(CURRENT_DIR)
-	cmd = 'python XML2MapReduce/main.py ' + schemaFile + ' ' + tmpFilePath + ' ' + queryName + ' ' + queryInputPath + ' ' + queryOutputPath
-	print cmd
-	subprocess.check_call(cmd, shell=True)
+# print 'TODO: call job generation program in ./bin/';
+    os.chdir(CURRENT_DIR)
+    cmd = 'python XML2MapReduce/main.py ' + schemaFile + ' ' + tmpFilePath + ' ' + queryName + ' ' + queryInputPath + ' ' + queryOutputPath
+    print cmd
+    
+    #     config.queryname = sys.argv[3]
+    #     config.scriptname = config.queryname + ".script"
+    #     config.input_path = sys.argv[4]
+    #     config.output_path = sys.argv[5]
+    
+    code_gen.ysmart_code_gen(sys.argv, queryInputPath, queryOutputPath)
+    
+    #     subprocess.check_call(cmd, shell=True)
 
 def print_usage():
 	print 'usage 1: ./translate.py <query-file>.sql <schema-file>.schema';
