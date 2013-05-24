@@ -68,10 +68,13 @@ def main():
         queryName = "testquery"
         queryInputPath = "YSmartInput/"
         queryOutputPath = "YSmartOutput/"
-    else:
+    elif (len(sys.argv) == 6):
         queryName = sys.argv[3];
         queryInputPath = sys.argv[4];
         queryOutputPath = sys.argv[5];
+    else:
+        print_usage()
+        raise 
 
     print '--------------------------------------------------------------------';
     print 'Generating XML tree ...';
