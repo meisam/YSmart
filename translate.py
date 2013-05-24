@@ -49,45 +49,40 @@ def genHadoopJobs(schemaFile, xmlFilePath, queryName, queryInputPath, queryOutpu
     print cmd
     
     code_gen.ysmart_code_gen(xmlFilePath, schemaFile, queryName, queryInputPath, queryOutputPath)
-    
-    #     subprocess.check_call(cmd, shell=True)
 
 def print_usage():
-	print 'usage 1: ./translate.py <query-file>.sql <schema-file>.schema';
-	print 'usage 2: ./translate.py <query-file>.sql <schema-file>.schema <query-name> <query-input-path> <query-output-path>';
+    print 'usage 1: ./translate.py <query-file>.sql <schema-file>.schema';
+    print 'usage 2: ./translate.py <query-file>.sql <schema-file>.schema <query-name> <query-input-path> <query-output-path>';
 
 def main():
-	if (len(sys.argv) != 6 and len(sys.argv) != 3):
-		print_usage();
-		sys.exit(0);
+    if (len(sys.argv) != 6 and len(sys.argv) != 3):
+        print_usage();
+        sys.exit(0);
 
-	queryFile = sys.argv[1];
-	schemaFile = sys.argv[2];
-	tmpFile = str(datetime.datetime.now()).replace(' ', '_') + '.xml';
-	xmlFilePath = './' + TEMP_DIR + '/' + tmpFile;
+    queryFile = sys.argv[1];
+    schemaFile = sys.argv[2];
+    tmpFile = str(datetime.datetime.now()).replace(' ', '_') + '.xml';
+    xmlFilePath = './' + TEMP_DIR + '/' + tmpFile;
 
-	if (len(sys.argv) == 3):
-		queryName = "testquery"
-		queryInputPath = "YSmartInput/"
-		queryOutputPath = "YSmartOutput/"
-	else:
-		queryName = sys.argv[3];
-		queryInputPath = sys.argv[4];
-		queryOutputPath = sys.argv[5];
+    if (len(sys.argv) == 3):
+        queryName = "testquery"
+        queryInputPath = "YSmartInput/"
+        queryOutputPath = "YSmartOutput/"
+    else:
+        queryName = sys.argv[3];
+        queryInputPath = sys.argv[4];
+        queryOutputPath = sys.argv[5];
 
-	print '--------------------------------------------------------------------';
-	print 'Generating XML tree ...';
-	genXMLTree(queryFile, xmlFilePath);
+    print '--------------------------------------------------------------------';
+    print 'Generating XML tree ...';
+    genXMLTree(queryFile, xmlFilePath);
 
-	print 'Generating Hadoop jobs ...';
-	genHadoopJobs(schemaFile, xmlFilePath, queryName, queryInputPath, queryOutputPath);
+    print 'Generating Hadoop jobs ...';
+    genHadoopJobs(schemaFile, xmlFilePath, queryName, queryInputPath, queryOutputPath);
 
-	print 'Done';
-	print '--------------------------------------------------------------------';
-	subprocess.check_call(['rm', '-rf', './' + TEMP_DIR]);
-
-
+    print 'Done';
+    print '--------------------------------------------------------------------';
+    subprocess.check_call(['rm', '-rf', './' + TEMP_DIR]);
 
 if __name__ == "__main__":
     main();
-
