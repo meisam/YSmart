@@ -4675,7 +4675,7 @@ def list_contain_exp(exp_list,exp):
     return False
 
 
-def ysmart_tree_gen(schema,xml_file):
+def ysmart_tree_gen(xml_file,schema):
 
     process_schema_in_a_file(schema)
     
