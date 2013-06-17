@@ -48,7 +48,9 @@ def genHadoopJobs(schemaFile, xmlFilePath, queryName, queryInputPath, queryOutpu
     cmd = 'python XML2MapReduce/main.py ' + schemaFile + ' ' + xmlFilePath + ' ' + queryName + ' ' + queryInputPath + ' ' + queryOutputPath
     print cmd
     
-    code_gen.ysmart_code_gen(xmlFilePath, schemaFile, queryName, queryInputPath, queryOutputPath)
+    xml_query_srt = open(xmlFilePath).read()
+    schema_str = open(schemaFile).read()
+    code_gen.ysmart_code_gen(xml_query_srt, schema_str, queryName, queryInputPath, queryOutputPath)
 
 def print_usage():
     print 'usage 1: ./translate.py <query-file>.sql <schema-file>.schema';

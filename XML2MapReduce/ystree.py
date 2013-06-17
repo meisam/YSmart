@@ -2489,9 +2489,9 @@ class TableSchema:
         else:
             return None
 
-def get_the_select_node_from_a_file(filename):
+def get_the_select_node_from_a_file(xml_query_str):
 
-    doc = minidom.parse(filename)
+    doc = minidom.parseString(xml_query_str)
 
     node = doc.documentElement
 
@@ -2523,18 +2523,14 @@ def build_plan_tree_from_a_select_node(a_query_node):
 
     return t3
 
-def process_schema_in_a_file(schema_name):
+def process_schema_in_a_file(schema_str):
 
     global global_table_dict
 
     # a line is a table, format: tablename, (columnname:columntype), ...
-    fo = open(schema_name)
-    als = fo.readlines()
-    fo.close()
+    als = schema_str.splitlines()
 
     for al in als:
-        al = al[:-1]
-
         t_al_a = al.split("|")
 
         table_name = t_al_a[0].upper()
@@ -4675,11 +4671,11 @@ def list_contain_exp(exp_list, exp):
     return False
 
 
-def ysmart_tree_gen(xml_file, schema):
+def ysmart_tree_gen(xml_query_srt, schema_str):
 
-    process_schema_in_a_file(schema)
+    process_schema_in_a_file(schema_str)
 
-    thenode = get_the_select_node_from_a_file(xml_file)
+    thenode = get_the_select_node_from_a_file(xml_query_srt)
 
     node = build_plan_tree_from_a_select_node(thenode)
 

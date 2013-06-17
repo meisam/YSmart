@@ -3037,7 +3037,7 @@ def execute_jar(tree, jardir, jarname, classname, input_path, output_path, fo):
     return ret_name
 
 
-def ysmart_code_gen(xmlFilePath, schemaFile, queryName, input_path, output_path):
+def ysmart_code_gen(xml_query_srt, schema_str, queryName, input_path, output_path):
     pwd = os.getcwd()
     resultdir = "./result"
     codedir = "./YSmartCode"
@@ -3047,7 +3047,7 @@ def ysmart_code_gen(xmlFilePath, schemaFile, queryName, input_path, output_path)
     global packagename
 
 
-    tree_node = ystree.ysmart_tree_gen(xmlFilePath, schemaFile)
+    tree_node = ystree.ysmart_tree_gen(xml_query_srt, schema_str)
 
     if config.turn_on_correlation is True:
         tree_node = correlation.ysmart_correlation(tree_node)
