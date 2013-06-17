@@ -1,4 +1,4 @@
 select 
-	'size'
+	"size"
 from
 	units;

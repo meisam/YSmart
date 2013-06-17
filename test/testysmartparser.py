@@ -24,6 +24,7 @@ Created on May 7, 2013
 @author: fathi
 '''
 import sys
+import difflib
 sys.path.append("..")
 sys.path.append("../SQL2XML")
  
@@ -154,11 +155,14 @@ class Test(unittest.TestCase):
                          Expected output: %s
                          ---------------------------------------------------------------
                          Produced output: %s
+                         ---------------------------------------------------------------
+                         Diff: %s
                          ==============================================================="""
         producedXml = toXml(open(inputFileName)).upper()
         
         expectedXml = open(inputFileName + ".xml").read().upper()
-        self.assertEqual(expectedXml, producedXml, errorMsg % (inputFileName, expectedXml, producedXml))
+        diff = difflib.ndiff(expectedXml.splitlines(1), producedXml.splitlines(1))
+        self.assertEqual(expectedXml, producedXml, errorMsg % (inputFileName, expectedXml, producedXml, ''.join(diff)))
 
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testParser']
