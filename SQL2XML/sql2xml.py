@@ -66,7 +66,10 @@ def traverseTree(tree):
     
     for child in tree.children:
         token = child.token
-        type = token.getType()
+        if token is None:
+            type = 0 # the "<invalid>" token
+        else:
+            type = token.getType()
         name = YSmartParser.tokenNames[type]
         line = child.getLine()
         position = child.getCharPositionInLine()
