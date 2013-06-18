@@ -2814,14 +2814,14 @@ def generate_code(tree, filename):
 
     op_name = filename + ".java"
 
-    fo = open(op_name, "w")
+    fo = JobWriter(op_name)
+    job_files = [fo]
 
-    ret_name = filename
-
+    ret_name = []
 
     if isinstance(tree, ystree.TableNode):
         __tablenode_code_gen__(tree, fo)
-        return ret_name
+        return job_files
 
     elif isinstance(tree, ystree.OrderByNode):
         __orderby_code_gen__(tree, fo)
@@ -2833,11 +2833,13 @@ def generate_code(tree, filename):
             filename = filename[:-1] + str(int(filename[-1]) + 1)
             ret_name = generate_code(tree.composite, filename)
 
-        return ret_name
+        job_files.extend(ret_name)
+        return job_files
 
     elif isinstance(tree, ystree.SelectProjectNode):
         ret_name = generate_code(tree.child, filename)
-        return ret_name
+        job_files.extend(ret_name)
+        return job_files
 
     elif isinstance(tree, ystree.GroupByNode):
         __groupby_code_gen__(tree, fo)
@@ -2849,7 +2851,8 @@ def generate_code(tree, filename):
             filename = filename[:-1] + str(int(filename[-1]) + 1)
             ret_name = generate_code(tree.composite, filename)
 
-        return ret_name
+        job_files.extend(ret_name)
+        return job_files
 
     elif isinstance(tree, ystree.TwoJoinNode):
         if tree.left_composite is not None and tree.right_composite is not None:
@@ -2895,7 +2898,8 @@ def generate_code(tree, filename):
                 new_name = ret_name[:-1] + str(int(ret_name[-1]) + 1)
                 ret_name = generate_code(tree.right_child, new_name)
 
-        return ret_name
+        job_files.extend(ret_name)
+        return job_files
 
     elif isinstance(tree, ystree.CompositeNode):
         __composite_code_gen__(tree, fo)
@@ -2910,9 +2914,8 @@ def generate_code(tree, filename):
                 ret_name = new_name
                 i = i + 1
 
-        return ret_name
-
-    fo.close()
+        job_files.extend(ret_name)
+        return job_files
 
 def compile_class(tree, codedir, package_path, filename, fo):
 
@@ -3074,7 +3077,11 @@ def ysmart_code_gen(xml_query_srt, schema_str, queryName, input_path, output_pat
 
     os.chdir(codedir)
 
-    generate_code(tree_node, queryName)
+    jobs = generate_code(tree_node, queryName)
+    
+    for job in jobs:
+        with open(job.name, "w") as job_file:
+            job_file.write(job.content)
 
     os.chdir(pwd)
 
@@ -3088,4 +3095,14 @@ def ysmart_code_gen(xml_query_srt, schema_str, queryName, input_path, output_pat
 
     os.chdir(pwd)
 
+class JobWriter:
 
+    def __init__(self, file_name):
+      self.name = file_name
+      self.content = ""
+
+    def write(self, str):
+        self.content += str
+
+    def __str__(self):
+        return self.__content
