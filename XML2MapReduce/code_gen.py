@@ -35,7 +35,6 @@ bool_func_dict = {"AND":" && ", "OR":" || "}
 rel_func_dict = {"EQ":" == ", "GTH":" > ", "LTH":" < ", "NOT_EQ":" != ", "GEQ":" >= ", "LEQ":" <= "}
 
 packagepath = "edu/osu/cse/ysmart/"
-packagename = "edu.osu.cse.ysmart"
 
 
 # ##__select_func_convert_to_java__ is mainly used to convert the math function in the select list into jave expression
@@ -377,7 +376,7 @@ def __gen_des__(fo):
 */\n"
 
 def __gen_header__(fo):
-    print >> fo, "package " + packagename + ";"
+    print >> fo, "package " + fo.package_name + ";"
     print >> fo, "import java.io.IOException;"
     print >> fo, "import java.util.*;"
     print >> fo, "import java.text.*;"
@@ -392,6 +391,7 @@ def __gen_header__(fo):
     print >> fo, "import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;"
     print >> fo, "import org.apache.hadoop.mapreduce.lib.input.FileSplit;"
     print >> fo, "import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;"
+    print >> fo, "import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;"
     print >> fo, "import org.apache.hadoop.mapreduce.lib.partition.*;"
     print >> fo, "\n"
 
@@ -2737,8 +2737,9 @@ def __gen_main__(tree, fo, map_key_type, map_value_type, reduce_key_type, reduce
     print >> fo, "\t\tjob.setOutputKeyClass(" + reduce_key_type + ".class);"
     print >> fo, "\t\tjob.setOutputValueClass(" + reduce_value_type + ".class);"
     print >> fo, "\t\tjob.setMapperClass(Map.class);"
-    print >> fo, "\t\tjob.setReducerClass(Reduce.class);"
-    if reduce_bool is True:
+    # FIXME Meisam: Is this not reducnant? Look at the next if statement
+    # print >> fo, "\t\tjob.setReducerClass(Reduce.class);"
+    if reduce_bool:
         print >> fo, "\t\tjob.setReducerClass(Reduce.class);"
     if isinstance(tree, ystree.TwoJoinNode):
         print >> fo, "\t\tFileInputFormat.addInputPath(job,new Path(args[0]));"
@@ -2814,7 +2815,7 @@ def generate_code(tree, filename):
 
     op_name = filename + ".java"
 
-    fo = JobWriter(op_name)
+    fo = JobWriter(filename)
     job_files = [fo]
 
     ret_name = []
@@ -3047,8 +3048,6 @@ def ysmart_code_gen(xml_query_srt, schema_str, queryName, input_path, output_pat
     jardir = "./YSmartJar"
 
     global packagepath
-    global packagename
-
 
     tree_node = ystree.ysmart_tree_gen(xml_query_srt, schema_str)
 
@@ -3070,7 +3069,6 @@ def ysmart_code_gen(xml_query_srt, schema_str, queryName, input_path, output_pat
         os.makedirs(jardir)
 
     packagepath += queryName + "/"
-    packagename += "." + queryName
     scriptname = queryName + ".script"
     queryName += "1"
 
@@ -3097,8 +3095,13 @@ def ysmart_code_gen(xml_query_srt, schema_str, queryName, input_path, output_pat
 
 class JobWriter:
 
-    def __init__(self, file_name):
-      self.name = file_name
+    _base_package_path = "edu/osu/cse/ysmart/"
+    _base_package_name = "edu.osu.cse.ysmart"
+
+    def __init__(self, class_name):
+      self.name = class_name + ".java"
+      self.package_name = self._base_package_name + '.' + class_name
+      self.package_path = self._base_package_path + class_name + "/"
       self.content = ""
 
     def write(self, str):
