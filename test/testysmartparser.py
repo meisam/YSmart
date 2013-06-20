@@ -137,13 +137,13 @@ class Test(unittest.TestCase):
 
     ############# tests that exposes bugs in YSmart
     def testKeyword_UidParser(self):
-        self.sql2XmlTestScaffold("untit_tests/keywords_uid.sql") 
+        self.sql2XmlTestScaffold("unit_tests/keywords_uid.sql") 
 
     def testKeyword_StartParser(self):
-        self.sql2XmlTestScaffold("untit_tests/keywords_start.sql") 
+        self.sql2XmlTestScaffold("unit_tests/keywords_start.sql") 
 
     def testKeyword_SizeParser(self):
-        self.sql2XmlTestScaffold("untit_tests/keywords_size.sql") 
+        self.sql2XmlTestScaffold("unit_tests/keywords_size.sql") 
 
     #################################
     

@@ -63,10 +63,10 @@ class TestJobGenerator(unittest.TestCase):
         self.assertEqual(f.content, "\n".join(lines) + "\n")
 
     def test_select_country(self):
-        self._job_generator_scaffold('countries_select.sql', 'countries.schema', './test/untit_tests')
+        self._job_generator_scaffold('countries_select.sql', 'countries.schema', './test/unit_tests')
 
     def test_select_country_order_by(self):
-        self._job_generator_scaffold('countries_select_order_by.sql', 'countries.schema', './test/untit_tests')
+        self._job_generator_scaffold('countries_select_order_by.sql', 'countries.schema', './test/unit_tests')
 
     def test_ssb_q1_1(self):
         self._job_generator_scaffold('q1_1.sql', 'ssb.schema', './test/ssb_test')
