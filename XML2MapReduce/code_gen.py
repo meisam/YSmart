@@ -2810,12 +2810,14 @@ def __composite_code_gen__(tree, fo):
     __composite_gen_mr__(tree, fo)
     print >> fo, "}\n"
 
+def _next_file_name(base_file_name, counter):
+    return ("%s%03d" % (base_file_name, counter), counter + 1)
 
 def generate_code(tree, filename):
 
-    op_name = filename + ".java"
-
-    fo = JobWriter(filename)
+    counter = 0
+    job_name, counter = _next_file_name(filename, counter)
+    fo = JobWriter(job_name)
     job_files = [fo]
 
     ret_name = []
@@ -2828,11 +2830,11 @@ def generate_code(tree, filename):
         __orderby_code_gen__(tree, fo)
         if tree.composite is None:
             if not isinstance(tree.child, ystree.TableNode):
-                filename = filename[:-1] + str(int(filename[-1]) + 1)
-                ret_name = generate_code(tree.child, filename)
+                new_file_name, counter = _next_file_name(filename, counter)
+                ret_name = generate_code(tree.child, new_file_name)
         else:
-            filename = filename[:-1] + str(int(filename[-1]) + 1)
-            ret_name = generate_code(tree.composite, filename)
+            new_file_name, counter = _next_file_name(filename, counter)
+            ret_name = generate_code(tree.composite, new_file_name)
 
         job_files.extend(ret_name)
         return job_files
@@ -2846,58 +2848,59 @@ def generate_code(tree, filename):
         __groupby_code_gen__(tree, fo)
         if tree.composite is None:
             if not isinstance(tree.child, ystree.TableNode):
-                filename = filename[:-1] + str(int(filename[-1]) + 1)
-                ret_name = generate_code(tree.child, filename)
+                new_file_name, counter = _next_file_name(filename, counter)
+                ret_name = generate_code(tree.child, new_file_name)
         else:
-            filename = filename[:-1] + str(int(filename[-1]) + 1)
-            ret_name = generate_code(tree.composite, filename)
+            new_file_name, counter = _next_file_name(filename, counter)
+            ret_name = generate_code(tree.composite, new_file_name)
 
         job_files.extend(ret_name)
         return job_files
 
     elif isinstance(tree, ystree.TwoJoinNode):
         if tree.left_composite is not None and tree.right_composite is not None:
-            new_name = filename[:-1] + str(int(filename[-1]) + 1)
-            __join_code_gen__(tree, new_name, fo)
-            new_name = generate_code(tree.left_composite, new_name)
+            new_file_name, counter = _next_file_name(filename, counter)
+            __join_code_gen__(tree, new_file_name, fo)
+            new_name = generate_code(tree.left_composite, new_file_name)
 
-            new_name = new_name[:-1] + str(int(new_name[-1]) + 1)
-            ret_name = generate_code(tree.right_composite, new_name)
+            new_file_name, counter = _next_file_name(filename, counter)
+            ret_name = generate_code(tree.right_composite, new_file_name)
 
         elif tree.left_composite is not None:
-            new_name = filename[:-1] + str(int(filename[-1]) + 1)
-            __join_code_gen__(tree, new_name, fo)
-            new_name = generate_code(tree.left_composite, new_name)
-            ret_name = new_name
+            new_file_name, counter = _next_file_name(filename, counter)
+            __join_code_gen__(tree, new_file_name, fo)
+            new_file_name = generate_code(tree.left_composite, new_file_name)
+            ret_name = new_file_name
 
             if not isinstance(tree.right_child, ystree.TableNode):
-                new_name = new_name[:-1] + str(int(new_name[-1]) + 1)
+                new_file_name, counter = _next_file_name(filename, counter)
                 ret_name = generate_code(tree.right_child, new_name)
 
         elif tree.right_composite is not None:
             if not isinstance(tree.left_child, ystree.TableNode):
-                new_name = filename[:-1] + str(int(filename[-1]) + 1)
+                new_file_name, counter = _next_file_name(filename, counter)
                 __join_code_gen__(tree, new_name, fo)
-                new_name = generate_code(tree.left_child, new_name)
+                new_file_name = generate_code(tree.left_child, new_file_name)
             else:
-                new_name = filename
+                new_file_name = filename
 
-            new_name = new_name[:-1] + str(int(new_name[-1]) + 1)
-            ret_name = generate_code(tree.right_composite, new_name)
+            new_file_name, counter = _next_file_name(filename, counter)
+            ret_name = generate_code(tree.right_composite, new_file_name)
 
         else:
             if not isinstance(tree.left_child, ystree.TableNode):
-                new_name = filename[:-1] + str(int(filename[-1]) + 1)
-                __join_code_gen__(tree, new_name, fo)
-                ret_name = generate_code(tree.left_child, new_name)
+                new_file_name, counter = _next_file_name(filename, counter)
+                __join_code_gen__(tree, new_file_name, fo)
+                ret_name = generate_code(tree.left_child, new_file_name)
 
             else:
-                ret_name = filename
+                # FIXME: Meisam: This certainly should not happen
+                ret_name = []
                 __join_code_gen__(tree, tree.left_child.table_name, fo)
 
             if not isinstance(tree.right_child, ystree.TableNode):
-                new_name = ret_name[:-1] + str(int(ret_name[-1]) + 1)
-                ret_name = generate_code(tree.right_child, new_name)
+                new_file_name, counter = _next_file_name(filename, counter)
+                ret_name = generate_code(tree.right_child, new_file_name)
 
         job_files.extend(ret_name)
         return job_files
@@ -2910,7 +2913,7 @@ def generate_code(tree, filename):
             for x in tree.child_list:
                 if isinstance(x, ystree.TableNode):
                     continue
-                new_name = filename[:-1] + str(i)
+                
                 new_name = generate_code(x, new_name)
                 ret_name = new_name
                 i = i + 1
@@ -3100,12 +3103,12 @@ class JobWriter:
 
     def __init__(self, class_name):
       self.name = class_name + ".java"
-      self.package_name = self._base_package_name + '.' + class_name
-      self.package_path = self._base_package_path + class_name + "/"
+      self.package_name = self._base_package_name
+      self.package_path = self._base_package_path
       self.content = ""
 
     def write(self, str):
         self.content += str
 
     def __str__(self):
-        return self.__content
+        return self.content
