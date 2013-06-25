@@ -23,6 +23,7 @@ import copy
 import ystree
 import correlation
 import config
+from xapian import RuntimeError
 
 # #input exp should be YFuncExp
 
@@ -2810,17 +2811,23 @@ def __composite_code_gen__(tree, fo):
     __composite_gen_mr__(tree, fo)
     print >> fo, "}\n"
 
-def _next_file_name(base_file_name, counter):
-    return ("%s%03d" % (base_file_name, counter), counter + 1)
+def _next_file_name(last_file_name):
+    digit_part = last_file_name[-3:]
+    if digit_part.isdigit():
+        n = int(digit_part)
+        base_file_name = last_file_name[:-3]
+    else:
+        n = 0
+        base_file_name = last_file_name
+    return "%s%03d" % (base_file_name, n+1)
 
 def generate_code(tree, filename):
 
-    counter = 0
-    job_name, counter = _next_file_name(filename, counter)
+    job_name = filename #_next_file_name(filename)
     fo = JobWriter(job_name)
     job_files = [fo]
 
-    ret_name = []
+    child_jobs = []
 
     if isinstance(tree, ystree.TableNode):
         __tablenode_code_gen__(tree, fo)
@@ -2830,95 +2837,96 @@ def generate_code(tree, filename):
         __orderby_code_gen__(tree, fo)
         if tree.composite is None:
             if not isinstance(tree.child, ystree.TableNode):
-                new_file_name, counter = _next_file_name(filename, counter)
-                ret_name = generate_code(tree.child, new_file_name)
+                new_file_name = _next_file_name(filename)
+                child_jobs = generate_code(tree.child, new_file_name)
         else:
-            new_file_name, counter = _next_file_name(filename, counter)
-            ret_name = generate_code(tree.composite, new_file_name)
+            new_file_name = _next_file_name(filename)
+            child_jobs = generate_code(tree.composite, new_file_name)
 
-        job_files.extend(ret_name)
+        job_files.extend(child_jobs)
         return job_files
 
     elif isinstance(tree, ystree.SelectProjectNode):
-        ret_name = generate_code(tree.child, filename)
-        job_files.extend(ret_name)
+        child_jobs = generate_code(tree.child, filename)
+        job_files.extend(child_jobs)
         return job_files
 
     elif isinstance(tree, ystree.GroupByNode):
         __groupby_code_gen__(tree, fo)
         if tree.composite is None:
             if not isinstance(tree.child, ystree.TableNode):
-                new_file_name, counter = _next_file_name(filename, counter)
-                ret_name = generate_code(tree.child, new_file_name)
+                new_file_name = _next_file_name(filename)
+                child_jobs = generate_code(tree.child, new_file_name)
         else:
-            new_file_name, counter = _next_file_name(filename, counter)
-            ret_name = generate_code(tree.composite, new_file_name)
+            new_file_name = _next_file_name(filename)
+            child_jobs = generate_code(tree.composite, new_file_name)
 
-        job_files.extend(ret_name)
+        job_files.extend(child_jobs)
         return job_files
 
     elif isinstance(tree, ystree.TwoJoinNode):
         if tree.left_composite is not None and tree.right_composite is not None:
-            new_file_name, counter = _next_file_name(filename, counter)
+            new_file_name = _next_file_name(filename)
             __join_code_gen__(tree, new_file_name, fo)
-            new_name = generate_code(tree.left_composite, new_file_name)
+            child_jobs = generate_code(tree.left_composite, new_file_name)
+            new_file_name = child_jobs[-1].name
 
-            new_file_name, counter = _next_file_name(filename, counter)
-            ret_name = generate_code(tree.right_composite, new_file_name)
+            new_file_name = _next_file_name(new_file_name)
+            child_jobs = generate_code(tree.right_composite, new_file_name)
 
         elif tree.left_composite is not None:
-            new_file_name, counter = _next_file_name(filename, counter)
+            new_file_name = _next_file_name(filename)
             __join_code_gen__(tree, new_file_name, fo)
-            new_file_name = generate_code(tree.left_composite, new_file_name)
-            ret_name = new_file_name
+            child_jobs = generate_code(tree.left_composite, new_file_name)
+            new_file_name = child_jobs[-1].name
 
             if not isinstance(tree.right_child, ystree.TableNode):
-                new_file_name, counter = _next_file_name(filename, counter)
-                ret_name = generate_code(tree.right_child, new_name)
+                new_file_name = _next_file_name(new_file_name)
+                child_jobs = generate_code(tree.right_child, new_file_name)
 
         elif tree.right_composite is not None:
             if not isinstance(tree.left_child, ystree.TableNode):
-                new_file_name, counter = _next_file_name(filename, counter)
-                __join_code_gen__(tree, new_name, fo)
-                new_file_name = generate_code(tree.left_child, new_file_name)
+                new_file_name = _next_file_name(filename)
+                __join_code_gen__(tree, new_file_name, fo)
+                child_jobs = generate_code(tree.left_child, new_file_name)
+                new_file_name = child_jobs[-1].name
             else:
                 new_file_name = filename
 
-            new_file_name, counter = _next_file_name(filename, counter)
-            ret_name = generate_code(tree.right_composite, new_file_name)
+            new_file_name = _next_file_name(new_file_name)
+            child_jobs = generate_code(tree.right_composite, new_file_name)
 
         else:
             if not isinstance(tree.left_child, ystree.TableNode):
-                new_file_name, counter = _next_file_name(filename, counter)
+                new_file_name = _next_file_name(filename)
                 __join_code_gen__(tree, new_file_name, fo)
-                ret_name = generate_code(tree.left_child, new_file_name)
-
+                child_jobs = generate_code(tree.left_child, new_file_name)
+                new_file_name = child_jobs[-1].name
             else:
-                # FIXME: Meisam: This certainly should not happen
-                ret_name = []
+                new_file_name = filename
                 __join_code_gen__(tree, tree.left_child.table_name, fo)
 
             if not isinstance(tree.right_child, ystree.TableNode):
-                new_file_name, counter = _next_file_name(filename, counter)
-                ret_name = generate_code(tree.right_child, new_file_name)
+                new_file_name = _next_file_name(new_file_name)
+                child_jobs = generate_code(tree.right_child, new_file_name)
 
-        job_files.extend(ret_name)
+        job_files.extend(child_jobs)
         return job_files
 
     elif isinstance(tree, ystree.CompositeNode):
         __composite_code_gen__(tree, fo)
 
         if len(tree.child_list) > 0:
-            i = int(filename[-1]) + 1
+            new_file_name = filename
             for x in tree.child_list:
                 if isinstance(x, ystree.TableNode):
                     continue
                 
-                new_name = generate_code(x, new_name)
-                ret_name = new_name
-                i = i + 1
+                new_file_name = _next_file_name(new_file_name)
+                child_jobs = generate_code(x, new_file_name)
+                new_file_name = child_jobs[-1].job_name 
 
-        job_files.extend(ret_name)
+        job_files.extend(child_jobs)
         return job_files
 
 def compile_class(tree, codedir, package_path, filename, fo):
@@ -3096,16 +3104,24 @@ def ysmart_code_gen(xml_query_srt, schema_str, queryName, input_path, output_pat
 
     os.chdir(pwd)
 
+INITIAL_CLASSNAME_SUFFIX = "001"
+
+def base_name(job_name):
+    if job_name[-len(INITIAL_CLASSNAME_SUFFIX):].isdigit():
+        return job_name[:-len(INITIAL_CLASSNAME_SUFFIX)]
+    else:
+        return job_name 
+
 class JobWriter:
 
     _base_package_path = "edu/osu/cse/ysmart/"
-    _base_package_name = "edu.osu.cse.ysmart"
+    _base_package_name = "edu.osu.cse.ysmart."
 
     def __init__(self, class_name):
-      self.name = class_name + ".java"
-      self.package_name = self._base_package_name
-      self.package_path = self._base_package_path
-      self.content = ""
+        self.name = class_name + ".java"
+        self.package_name = self._base_package_name + base_name(class_name) 
+        self.package_path = self._base_package_path + base_name(class_name)
+        self.content = ""
 
     def write(self, str):
         self.content += str
