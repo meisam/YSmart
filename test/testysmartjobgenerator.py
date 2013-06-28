@@ -40,15 +40,15 @@ import antlr3
 import unittest
 import ystree
 from sql2xml import toXml
-from code_gen import JobWriter, generate_code
+from code_gen import JobWriter, generate_code, base_name, INITIAL_CLASSNAME_SUFFIX
 
 import unittest
 
 class TestJobGenerator(unittest.TestCase):
 
+
     def setUp(self):
         pass
-
 
     def tearDown(self):
         pass
@@ -80,6 +80,57 @@ class TestJobGenerator(unittest.TestCase):
     def test_ssb_q2_1(self):
         self._job_generator_scaffold('q2_1.sql', 'ssb.schema', './test/ssb_test')
 
+    def test_ssb_q2_2(self):
+        self._job_generator_scaffold('q2_2.sql', 'ssb.schema', './test/ssb_test')
+
+    def test_ssb_q2_3(self):
+        self._job_generator_scaffold('q2_3.sql', 'ssb.schema', './test/ssb_test')
+
+    def test_ssb_q3_1(self):
+        self._job_generator_scaffold('q3_1.sql', 'ssb.schema', './test/ssb_test')
+
+    def test_ssb_q3_2(self):
+        self._job_generator_scaffold('q3_2.sql', 'ssb.schema', './test/ssb_test')
+
+    def test_ssb_q3_3(self):
+        self._job_generator_scaffold('q3_3.sql', 'ssb.schema', './test/ssb_test')
+
+    def test_ssb_q3_4(self):
+        self._job_generator_scaffold('q3_4.sql', 'ssb.schema', './test/ssb_test')
+
+    def test_ssb_q4_1(self):
+        self._job_generator_scaffold('q4_1.sql', 'ssb.schema', './test/ssb_test')
+
+    def test_ssb_q4_2(self):
+        self._job_generator_scaffold('q4_2.sql', 'ssb.schema', './test/ssb_test')
+
+    def test_ssb_q4_3(self):
+        self._job_generator_scaffold('q4_3.sql', 'ssb.schema', './test/ssb_test')
+
+    def test_tpch_1(self):
+        self._job_generator_scaffold('tpch1query.sql', 'tpch.schema', './test/tpch_test')
+
+    def test_tpch_3(self):
+        self._job_generator_scaffold('tpch3query.sql', 'tpch.schema', './test/tpch_test')
+
+    def test_tpch_5(self):
+        self._job_generator_scaffold('tpch5query.sql', 'tpch.schema', './test/tpch_test')
+
+    def test_tpch_6(self):
+        self._job_generator_scaffold('tpch6query.sql', 'tpch.schema', './test/tpch_test')
+
+    def test_tpch_10(self):
+        self._job_generator_scaffold('tpch10query.sql', 'tpch.schema', './test/tpch_test')
+
+    def test_tpch_17(self):
+        self._job_generator_scaffold('tpch17query.sql', 'tpch.schema', './test/tpch_test')
+
+    def test_tpch_18(self):
+        self._job_generator_scaffold('tpch18query.sql', 'tpch.schema', './test/tpch_test')
+
+    def test_tpch_21(self):
+        self._job_generator_scaffold('tpch21query.sql', 'tpch.schema', './test/tpch_test')
+
     def _job_generator_scaffold(self, query_file_name, schema_file_name, path):
         errorMsg ="""
 Expected output and produced output do not match for %s:
@@ -96,7 +147,7 @@ Diff: %s
 
         # Needed to match results with the YSmart online version
         config.turn_on_correlation = True
-        config.advanced_agg = True
+        config.advanced_agg = False
         
         inputFileName = os.path.join(path , query_file_name)
         schema_file_name = os.path.join(path, schema_file_name)
@@ -106,18 +157,22 @@ Diff: %s
 
         tree_node = ystree.ysmart_tree_gen(xml_str, schema_str)
 
-        job_name = query_file_name[:-len('.sql')]
+        job_name = query_file_name[:-len('.sql')] + INITIAL_CLASSNAME_SUFFIX
         jobs = generate_code(tree_node, job_name)
 
 
-        hadoop_job_files = _hadoop_job_files(path, job_name)
+        expected_job_files = [j for j in _hadoop_job_files(path, job_name)]
 
-        self.assertEqual(len(hadoop_job_files), len(jobs),
-                          "A different number of hadoop jab files generated for %s! Expected=%d, generated=%d"
-                           % (job_name, len(hadoop_job_files), len(jobs)))
+        self.assertEqual(len(expected_job_files), len(jobs),
+                          "A different number of hadoop jab files generated for %s! Expected=%d, generated=%d,\n"
+                          "generated file names=%s\n"
+                          "expected file names=%s"
+                           % (job_name, len(expected_job_files), len(jobs)
+                              , [job.name for job in jobs]
+                              , expected_job_files))
 
         for job in jobs:
-            self.assertTrue(job.name in hadoop_job_files,
+            self.assertTrue(job.name in expected_job_files,
                              "Hadoop job file %s generated but not expected to be generated!" % job.name)
 
         for job in jobs:
@@ -125,7 +180,8 @@ Diff: %s
             with open(output_path) as expected_output:
                 expected_output_str = expected_output.read()
                 diff = difflib.ndiff(expected_output_str.splitlines(1), job.content.splitlines(1))
-                self.assertEqual(expected_output_str, job.content, errorMsg % (job.name, expected_output_str, job.content, ''.join(diff)))
+                self.assertEqual(expected_output_str, job.content, errorMsg 
+                                 % (job.name, "[Omitted...]", "[Omitted...]", ''.join(diff)))
 
 def _hadoop_job_files(path, job_name):
     '''
@@ -138,7 +194,11 @@ def _hadoop_job_files(path, job_name):
      files whose names are SelectQuery1.java, SelectQuery2.java, SelectQuery01.java
      if they exist in the given directory.
     '''
-    return filter(lambda f: f.startswith(job_name) and f.endswith('java') and f[len(job_name):][:-len('.java')].isdigit(), os.listdir(path))
+    for f in os.listdir(path):
+        if f.endswith('.java'):
+            class_name = base_name(f[:-len('.java')])
+            if base_name(job_name)  == class_name:
+                yield f
 
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testParser']
