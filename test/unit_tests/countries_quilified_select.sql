@@ -1,0 +1,2 @@
+select COUNTRY.C_NAME
+from COUNTRY;
