@@ -147,7 +147,7 @@ Diff: %s
 
         # Needed to match results with the YSmart online version
         config.turn_on_correlation = True
-        config.advanced_agg = False
+        config.advanced_agg = True
         
         inputFileName = os.path.join(path , query_file_name)
         schema_file_name = os.path.join(path, schema_file_name)
