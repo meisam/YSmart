@@ -2924,7 +2924,7 @@ def generate_code(tree, filename):
                 
                 new_file_name = _next_file_name(new_file_name)
                 child_jobs = generate_code(x, new_file_name)
-                new_file_name = child_jobs[-1].job_name 
+                new_file_name = child_jobs[-1].name 
 
         job_files.extend(child_jobs)
         return job_files

@@ -39,6 +39,7 @@ from antlr3.tokens import CommonToken
 import antlr3
 import unittest
 import ystree
+import correlation
 from sql2xml import toXml
 from code_gen import JobWriter, generate_code, base_name, INITIAL_CLASSNAME_SUFFIX
 
@@ -156,6 +157,7 @@ Diff: %s
             schema_str = schema_file.read()
 
         tree_node = ystree.ysmart_tree_gen(xml_str, schema_str)
+        tree_node = correlation.ysmart_correlation(tree_node)
 
         job_name = query_file_name[:-len('.sql')] + INITIAL_CLASSNAME_SUFFIX
         jobs = generate_code(tree_node, job_name)
