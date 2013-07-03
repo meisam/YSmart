@@ -2738,9 +2738,9 @@ def __gen_main__(tree, fo, map_key_type, map_value_type, reduce_key_type, reduce
     print >> fo, "\t\tjob.setOutputValueClass(" + reduce_value_type + ".class);"
     print >> fo, "\t\tjob.setMapperClass(Map.class);"
     # FIXME Meisam: Is this not reducnant? Look at the next if statement
-    # print >> fo, "\t\tjob.setReducerClass(Reduce.class);"
-    if reduce_bool:
-        print >> fo, "\t\tjob.setReducerClass(Reduce.class);"
+    print >> fo, "\t\tjob.setReducerClass(Reduce.class);"
+#     if reduce_bool:
+#         print >> fo, "\t\tjob.setReducerClass(Reduce.class);"
     if isinstance(tree, ystree.TwoJoinNode):
         print >> fo, "\t\tFileInputFormat.addInputPath(job,new Path(args[0]));"
         print >> fo, "\t\tFileInputFormat.addInputPath(job,new Path(args[1]));"
