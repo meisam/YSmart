@@ -2888,6 +2888,7 @@ def generate_code(tree, filename):
                 new_file_name = _next_file_name(filename)
                 __join_code_gen__(tree, new_file_name, fo)
                 child_jobs = generate_code(tree.left_child, new_file_name)
+                job_files.extend(child_jobs)
                 new_file_name = child_jobs[-1].class_name
             else:
                 new_file_name = filename
