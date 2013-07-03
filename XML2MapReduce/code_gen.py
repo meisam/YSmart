@@ -23,7 +23,6 @@ import copy
 import ystree
 import correlation
 import config
-from xapian import RuntimeError
 
 # #input exp should be YFuncExp
 
