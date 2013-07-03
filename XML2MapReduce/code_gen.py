@@ -709,7 +709,7 @@ def __orderby_gen_mr__(tree, fo):
         key_spec += " "
 
     print >> fo, "\tpublic int run(String[] args) throws Exception{\n"
-    job_name = fo.name.split(".java")[0]
+    job_name = fo.class_name
     print >> fo, "\t\tConfiguration conf = new Configuration();"
     print >> fo, "\t\tconf.set(\"mapreduce.partition.keycomparator.options\",\"" + key_spec + "\");"
     print >> fo, "\t\tconf.set(\"mapreduce.map.output.key.field.separator\", \"|\");"
@@ -1899,7 +1899,7 @@ def __composite_gen_mr__(tree, fo):
     i = 1
     index_to_name = {}
 
-    filename = fo.name.split(".java")[0]
+    filename = fo.class_name
 
     for node in tree.child_list:
         index = tree.child_list.index(node)
@@ -2727,7 +2727,7 @@ def __composite_gen_mr__(tree, fo):
 
 def __gen_main__(tree, fo, map_key_type, map_value_type, reduce_key_type, reduce_value_type, reduce_bool):
     print >> fo, "\tpublic int run(String[] args) throws Exception{\n"
-    jobname = fo.name.split(".java")[0]
+    jobname = fo.class_name
 
     print >> fo, "\t\tConfiguration conf = new Configuration();"
     print >> fo, "\t\tJob job = new Job(conf,\"" + jobname + "\");"
@@ -2766,7 +2766,7 @@ def __tablenode_code_gen__(tree, fo):
     __gen_des__(fo)
     __gen_header__(fo)
 
-    print >> fo, "public class " + fo.name.split(".java")[0] + " extends Configured implements Tool{\n"
+    print >> fo, "public class " + fo.class_name + " extends Configured implements Tool{\n"
 
     __tablenode_gen_mr__(tree, fo)
 
@@ -2776,7 +2776,7 @@ def __orderby_code_gen__(tree, fo):
     __gen_des__(fo)
     __gen_header__(fo)
 
-    print >> fo, "public class " + fo.name.split(".java")[0] + " extends Configured implements Tool{\n"
+    print >> fo, "public class " + fo.class_name + " extends Configured implements Tool{\n"
 
     __orderby_gen_mr__(tree, fo)
 
@@ -2787,7 +2787,7 @@ def __groupby_code_gen__(tree, fo):
     __gen_des__(fo)
     __gen_header__(fo)
 
-    print >> fo, "public class " + fo.name.split(".java")[0] + " extends Configured implements Tool{\n"
+    print >> fo, "public class " + fo.class_name + " extends Configured implements Tool{\n"
 
     __groupby_gen_mr__(tree, fo)
 
@@ -2797,7 +2797,7 @@ def __groupby_code_gen__(tree, fo):
 def __join_code_gen__(tree, left_name, fo):
     __gen_des__(fo)
     __gen_header__(fo)
-    print >> fo, "public class " + fo.name.split(".java")[0] + " extends Configured implements Tool{\n"
+    print >> fo, "public class " + fo.class_name + " extends Configured implements Tool{\n"
 
     __join_gen_mr__(tree, left_name, fo)
     print >> fo, "}\n"
@@ -2805,7 +2805,7 @@ def __join_code_gen__(tree, left_name, fo):
 def __composite_code_gen__(tree, fo):
     __gen_des__(fo)
     __gen_header__(fo)
-    print >> fo, "public class " + fo.name.split(".java")[0] + " extends Configured implements Tool{\n"
+    print >> fo, "public class " + fo.class_name + " extends Configured implements Tool{\n"
 
     __composite_gen_mr__(tree, fo)
     print >> fo, "}\n"
@@ -2868,7 +2868,7 @@ def generate_code(tree, filename):
             new_file_name = _next_file_name(filename)
             __join_code_gen__(tree, new_file_name, fo)
             child_jobs = generate_code(tree.left_composite, new_file_name)
-            new_file_name = child_jobs[-1].name
+            new_file_name = child_jobs[-1].class_name
 
             new_file_name = _next_file_name(new_file_name)
             child_jobs = generate_code(tree.right_composite, new_file_name)
@@ -2877,7 +2877,7 @@ def generate_code(tree, filename):
             new_file_name = _next_file_name(filename)
             __join_code_gen__(tree, new_file_name, fo)
             child_jobs = generate_code(tree.left_composite, new_file_name)
-            new_file_name = child_jobs[-1].name
+            new_file_name = child_jobs[-1].class_name
 
             if not isinstance(tree.right_child, ystree.TableNode):
                 new_file_name = _next_file_name(new_file_name)
@@ -2888,7 +2888,7 @@ def generate_code(tree, filename):
                 new_file_name = _next_file_name(filename)
                 __join_code_gen__(tree, new_file_name, fo)
                 child_jobs = generate_code(tree.left_child, new_file_name)
-                new_file_name = child_jobs[-1].name
+                new_file_name = child_jobs[-1].class_name
             else:
                 new_file_name = filename
 
@@ -2900,7 +2900,7 @@ def generate_code(tree, filename):
                 new_file_name = _next_file_name(filename)
                 __join_code_gen__(tree, new_file_name, fo)
                 child_jobs = generate_code(tree.left_child, new_file_name)
-                new_file_name = child_jobs[-1].name
+                new_file_name = child_jobs[-1].class_name
             else:
                 new_file_name = filename
                 __join_code_gen__(tree, tree.left_child.table_name, fo)
@@ -2923,7 +2923,7 @@ def generate_code(tree, filename):
                 
                 new_file_name = _next_file_name(new_file_name)
                 child_jobs = generate_code(x, new_file_name)
-                new_file_name = child_jobs[-1].name 
+                new_file_name = child_jobs[-1].class_name 
 
         job_files.extend(child_jobs)
         return job_files
@@ -3117,10 +3117,18 @@ class JobWriter:
     _base_package_name = "edu.osu.cse.ysmart."
 
     def __init__(self, class_name):
-        self.name = class_name + ".java"
+        self.class_name = class_name
         self.package_name = self._base_package_name + base_name(class_name) 
         self.package_path = self._base_package_path + base_name(class_name)
         self.content = ""
+
+    @property
+    def name(self):
+        return self.class_name + '.java'
+
+    @property
+    def class_name(self):
+        return self.class_name
 
     def write(self, str):
         self.content += str
