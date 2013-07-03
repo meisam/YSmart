@@ -76,28 +76,28 @@ class Test(unittest.TestCase):
         pass
 
     def testTpch1Parser(self):
-        self.sql2XmlTestScaffold("tpch_test/1.sql") 
+        self.sql2XmlTestScaffold("tpch_test/tpch1query.sql") 
 
     def testTpch10Parser(self):
-        self.sql2XmlTestScaffold("tpch_test/10.sql") 
+        self.sql2XmlTestScaffold("tpch_test/tpch10query.sql") 
 
     def testTpch17Parser(self):
-        self.sql2XmlTestScaffold("tpch_test/17.sql") 
+        self.sql2XmlTestScaffold("tpch_test/tpch17query.sql") 
 
     def testTpch18Parser(self):
-        self.sql2XmlTestScaffold("tpch_test/18.sql") 
+        self.sql2XmlTestScaffold("tpch_test/tpch18query.sql") 
 
     def testTpch21Parser(self):
-        self.sql2XmlTestScaffold("tpch_test/21.sql") 
+        self.sql2XmlTestScaffold("tpch_test/tpch21query.sql") 
 
     def testTpch3Parser(self):
-        self.sql2XmlTestScaffold("tpch_test/3.sql") 
+        self.sql2XmlTestScaffold("tpch_test/tpch3query.sql") 
 
     def testTpch5Parser(self):
-        self.sql2XmlTestScaffold("tpch_test/5.sql") 
+        self.sql2XmlTestScaffold("tpch_test/tpch5query.sql") 
 
     def testTpch6Parser(self):
-        self.sql2XmlTestScaffold("tpch_test/6.sql") 
+        self.sql2XmlTestScaffold("tpch_test/tpch6query.sql") 
 
     def testSSb1_1Parser(self):
         self.sql2XmlTestScaffold("ssb_test/q1_1.sql") 
