@@ -2,12 +2,8 @@
 language: python
 python:
     - 2.7
-    - pypy
-    - 3.2
-    - 3.3
 env:
     - CORRELATION=true
-    - CORRELATION=false
 install:
     - pip install antlr_python_runtime
     - python setup.py install
