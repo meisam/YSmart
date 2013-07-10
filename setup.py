@@ -36,5 +36,5 @@ setup(
                   'ysmart.backend': 'src/ysmart/backend',
                   'ysmart.test': 'tests/ysmart/test'
                 },
-    scripts=['scripts/ysmart.py'],
+    scripts=['scripts/sql2mapred.py'],
 )
