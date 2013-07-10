@@ -542,8 +542,8 @@ ROWTYPE_ATTR=87
 class YSmartLexer(Lexer):
 
     grammarFileName = "YSmart.g"
-    antlr_version = version_str_to_tuple("3.3 Nov 30, 2010 12:45:30")
-    antlr_version_str = "3.3 Nov 30, 2010 12:45:30"
+    antlr_version = version_str_to_tuple("3.1 Nov 30, 2010 12:45:30")
+    antlr_version_str = "3.1 Nov 30, 2010 12:45:30"
 
     def __init__(self, input=None, state=None):
         if state is None:
