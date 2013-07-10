@@ -1,14 +1,37 @@
+* System Requirements
+
+Make sure you have Python 2.7 (not Python 3) installed system.
+You need Antlr3 runtime libraries for python. You can get then from 
+
+```bash
+$ pip install antlr_python_runtime
+```
+Or download and install it from here:
+https://pypi.python.org/pypi/antlr_python_runtime/3.1.3
+
 The simplest way to translate SQL queries to Hadoop jobs is to use the following command:
 $ python translation.py </path/to/the/sql/query> </path/to/the/database/schema>
 
+* How to install
+
+To install simply downlaod and extract the source code and then run this command
+
+```bash
+$ python setup.py install 
+```
+
+* An Example
+
 As an example:
-$ python translation.py test/tpch_test/17.sql test/tpch_test/tpch.schema
+$ sq2mapred tests/ysmart/test/tpch_test/tpch18query.sql tests/ysmart/test/tpch_test/tpch18query.sql
 
 This command saves the generated Hadoop jobs in the  ./result directory, which contains
 (1) the Java source codes in the ./result/YSmartCode. 
 (2) A ./result/testquery.script file that contains commands to compile and execute the generated Hadoop jobs.
 
-Note: YSmart does not compile or execute the generated jobs unless relevant configuration options are turned on.
+* Notes
+
+YSmart does not compile or execute the generated jobs unless relevant configuration options are turned on.
 Details are in readme.txt.
 
 Good Luck!
