@@ -27,13 +27,10 @@ Created on May 7, 2013
 '''
 import sys
 import difflib
-sys.path.append("..")
-sys.path.append("../SQL2XML")
-sys.path.append("../XML2MapReduce")
 
 import config
-from YSmartLexer import * # import all the tokens
-from YSmartParser import *
+from ysmart.frontend.YSmartLexer import * # import all the tokens
+from ysmart.frontend.YSmartParser import *
 from antlr3.tokens import CommonToken
 
 import antlr3

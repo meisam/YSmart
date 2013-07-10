@@ -20,8 +20,7 @@ import sys
 from distutils.core import setup
 from distutils.sysconfig import get_python_lib
 
-# Dynamically calculate the version based on django.VERSION.
-version = 'v13.09'
+version = '13.09'
 
 setup(
     name='YSmart',
@@ -30,8 +29,11 @@ setup(
     author='Rubao Lee and others',
     author_email='liru@cse.ohio-state.edu',
     description=('YSmart is a correlation aware SQL-to-MapReduce translator'),
-    license='Apache License 2.0',
-    packages=['antlr', 'ysmart.frontend', 'ysmart.backend'],
-    package_dir={'antlr': 'SQL2XML/antlr3', 'ysmart.frontend': 'SQL2XML', 'ysmart.backend': 'XML2MapReduce', 'ysmart.test': 'test '},
+    license='http://www.apache.org/licenses/LICENSE-2.0',
+    packages=['ysmart', 'ysmart.frontend', 'ysmart.backend', 'ysmart.test'],
+    package_dir={'ysmart':'.',
+                  'ysmart.frontend': 'SQL2XML',
+                  'ysmart.backend': 'XML2MapReduce',
+                },
     scripts=['translate.py'],
 )

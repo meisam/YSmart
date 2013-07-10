@@ -26,12 +26,9 @@ Created on May 7, 2013
 '''
 import sys
 import difflib
-sys.path.append("..")
-sys.path.append("../sql2spark")
-sys.path.append("../SQL2XML")
  
-from YSmartLexer import *  # import all the tokens
-from YSmartParser import *
+from ysmart.frontend.YSmartLexer import *  # import all the tokens
+from ysmart.frontend.YSmartParser import *
 from antlr3.tokens import CommonToken
 
 import sqltokens
@@ -93,9 +90,9 @@ class Test(unittest.TestCase):
             
             parse_tree = parser.start_rule()
             
-            print_tree(parse_tree.tree, 0)
+#             print_tree(parse_tree.tree, 0)
             
-            visit_tree(parse_tree.tree)
+            print(visit_tree(parse_tree.tree))
 
 def print_tree(node, indent):
     print "TRAVERSE:", " " * (indent * 4), node , "\t", type(node)
@@ -126,14 +123,23 @@ def visit_tree(node):
         childs_strings += visit_tree(child)
     
     if node.type == sqltokens.T_SELECT:
-        str = visit_t_select(node)
-        return  TEMPLATE_STRING % childs_strings
+        return "[SELECT: %s %s]" % (node, childs_strings) 
     elif node.type == sqltokens.T_RESERVED:
-        return "|||RESERVED WORD|||"
+        return "[RESERVED WORD: %s %s]" % (node, childs_strings)
+    elif node.type == sqltokens.ID:
+        return "[ID: %s %s]" % (node, childs_strings)
+    elif node.type == sqltokens.T_SELECT_COLUMN:
+        return "[SELECT COLUMS %s %s]" % (node, childs_strings)
+    elif node.type == sqltokens.T_COLUMN_LIST:
+        return "[T_COLUMN_LIST %s %s]" % (node, childs_strings)
+    elif node.type == sqltokens.T_FROM:
+        return "[T_FROM %s %s]" % (node, childs_strings)
+    elif node.type == sqltokens.SEMI:
+        return "[PARSING FINISHED: %s %s]" % (node, childs_strings)
+    elif node.type == 0: # root node
+        return "[Gotta be the root: %s %s]" % (node, childs_strings)
     else:
-        raise RuntimeException("Unknown type %s for node %s"    % (node.type, node))
-    
-    pass
+        raise RuntimeException("Unknown type %s for node %s" % (node.type, node))
 
 def visit_t_select(node):
     print()

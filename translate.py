@@ -22,10 +22,8 @@ import os;
 import subprocess;
 import sys;
 
-sys.path.append("SQL2XML") 
-import sql2xml
-sys.path.append("XML2MapReduce")
-import code_gen
+from ysmart.frontend import sql2xml
+from ysmart.backend import code_gen
 
 CURRENT_DIR = os.getcwd()
 EXEC_DIR = 'bin';
