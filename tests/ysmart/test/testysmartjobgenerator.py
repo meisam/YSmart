@@ -16,6 +16,7 @@
    limitations under the License.
 
 """
+from numpy.ma.core import absolute
 
 '''
 Testcases for YSmart front end
@@ -28,9 +29,12 @@ from ysmart.backend import correlation, ystree, config
 from ysmart.backend.code_gen import JobWriter, generate_code, base_name, \
     INITIAL_CLASSNAME_SUFFIX
 from ysmart.frontend.sql2xml import toXml
+
 import difflib
 import os
 import unittest
+
+base_tests_path = './tests/ysmart/test'
 
 class TestJobGenerator(unittest.TestCase):
 
@@ -51,75 +55,75 @@ class TestJobGenerator(unittest.TestCase):
         self.assertEqual(f.content, "\n".join(lines) + "\n")
 
     def test_select_country(self):
-        self._job_generator_scaffold('countries_select.sql', 'countries.schema', './test/unit_tests')
+        self._job_generator_scaffold('countries_select.sql', 'countries.schema', './unit_tests')
 
     def test_select_country_order_by(self):
-        self._job_generator_scaffold('countries_select_order_by.sql', 'countries.schema', './test/unit_tests')
+        self._job_generator_scaffold('countries_select_order_by.sql', 'countries.schema', './unit_tests')
 
     def test_ssb_q1_1(self):
-        self._job_generator_scaffold('q1_1.sql', 'ssb.schema', './test/ssb_test')
+        self._job_generator_scaffold('q1_1.sql', 'ssb.schema', './ssb_test')
 
     def test_ssb_q1_2(self):
-        self._job_generator_scaffold('q1_2.sql', 'ssb.schema', './test/ssb_test')
+        self._job_generator_scaffold('q1_2.sql', 'ssb.schema', './ssb_test')
 
     def test_ssb_q1_3(self):
-        self._job_generator_scaffold('q1_3.sql', 'ssb.schema', './test/ssb_test')
+        self._job_generator_scaffold('q1_3.sql', 'ssb.schema', './ssb_test')
 
     def test_ssb_q2_1(self):
-        self._job_generator_scaffold('q2_1.sql', 'ssb.schema', './test/ssb_test')
+        self._job_generator_scaffold('q2_1.sql', 'ssb.schema', './ssb_test')
 
     def test_ssb_q2_2(self):
-        self._job_generator_scaffold('q2_2.sql', 'ssb.schema', './test/ssb_test')
+        self._job_generator_scaffold('q2_2.sql', 'ssb.schema', './ssb_test')
 
     def test_ssb_q2_3(self):
-        self._job_generator_scaffold('q2_3.sql', 'ssb.schema', './test/ssb_test')
+        self._job_generator_scaffold('q2_3.sql', 'ssb.schema', './ssb_test')
 
     def test_ssb_q3_1(self):
-        self._job_generator_scaffold('q3_1.sql', 'ssb.schema', './test/ssb_test')
+        self._job_generator_scaffold('q3_1.sql', 'ssb.schema', './ssb_test')
 
     def test_ssb_q3_2(self):
-        self._job_generator_scaffold('q3_2.sql', 'ssb.schema', './test/ssb_test')
+        self._job_generator_scaffold('q3_2.sql', 'ssb.schema', './ssb_test')
 
     def test_ssb_q3_3(self):
-        self._job_generator_scaffold('q3_3.sql', 'ssb.schema', './test/ssb_test')
+        self._job_generator_scaffold('q3_3.sql', 'ssb.schema', './ssb_test')
 
     def test_ssb_q3_4(self):
-        self._job_generator_scaffold('q3_4.sql', 'ssb.schema', './test/ssb_test')
+        self._job_generator_scaffold('q3_4.sql', 'ssb.schema', './ssb_test')
 
     def test_ssb_q4_1(self):
-        self._job_generator_scaffold('q4_1.sql', 'ssb.schema', './test/ssb_test')
+        self._job_generator_scaffold('q4_1.sql', 'ssb.schema', './ssb_test')
 
     def test_ssb_q4_2(self):
-        self._job_generator_scaffold('q4_2.sql', 'ssb.schema', './test/ssb_test')
+        self._job_generator_scaffold('q4_2.sql', 'ssb.schema', './ssb_test')
 
     def test_ssb_q4_3(self):
-        self._job_generator_scaffold('q4_3.sql', 'ssb.schema', './test/ssb_test')
+        self._job_generator_scaffold('q4_3.sql', 'ssb.schema', './ssb_test')
 
     def test_tpch_1(self):
-        self._job_generator_scaffold('tpch1query.sql', 'tpch.schema', './test/tpch_test')
+        self._job_generator_scaffold('tpch1query.sql', 'tpch.schema', './tpch_test')
 
     def test_tpch_3(self):
-        self._job_generator_scaffold('tpch3query.sql', 'tpch.schema', './test/tpch_test')
+        self._job_generator_scaffold('tpch3query.sql', 'tpch.schema', './tpch_test')
 
     def test_tpch_5(self):
-        self._job_generator_scaffold('tpch5query.sql', 'tpch.schema', './test/tpch_test')
+        self._job_generator_scaffold('tpch5query.sql', 'tpch.schema', './tpch_test')
 
     def test_tpch_6(self):
-        self._job_generator_scaffold('tpch6query.sql', 'tpch.schema', './test/tpch_test')
+        self._job_generator_scaffold('tpch6query.sql', 'tpch.schema', './tpch_test')
 
     def test_tpch_10(self):
-        self._job_generator_scaffold('tpch10query.sql', 'tpch.schema', './test/tpch_test')
+        self._job_generator_scaffold('tpch10query.sql', 'tpch.schema', './tpch_test')
 
     def test_tpch_17(self):
-        self._job_generator_scaffold('tpch17query.sql', 'tpch.schema', './test/tpch_test')
+        self._job_generator_scaffold('tpch17query.sql', 'tpch.schema', './tpch_test')
 
     def test_tpch_18(self):
-        self._job_generator_scaffold('tpch18query.sql', 'tpch.schema', './test/tpch_test')
+        self._job_generator_scaffold('tpch18query.sql', 'tpch.schema', './tpch_test')
 
     def test_tpch_21(self):
-        self._job_generator_scaffold('tpch21query.sql', 'tpch.schema', './test/tpch_test')
+        self._job_generator_scaffold('tpch21query.sql', 'tpch.schema', './tpch_test')
 
-    def _job_generator_scaffold(self, query_file_name, schema_file_name, path):
+    def _job_generator_scaffold(self, query_file_name, schema_file_name, relative_path):
         errorMsg ="""
 Expected output and produced output do not match for %s:
 ------------------------------------------------------
@@ -137,6 +141,7 @@ Diff: %s
         config.turn_on_correlation = True
         config.advanced_agg = True
         
+        path = os.path.join(base_tests_path, relative_path)
         inputFileName = os.path.join(path , query_file_name)
         schema_file_name = os.path.join(path, schema_file_name)
         with open(inputFileName) as quey_file, open(schema_file_name) as schema_file:

@@ -16,6 +16,7 @@
    limitations under the License.
 
 """
+import os.path
 
 '''
 Testcases for YSmart front end
@@ -31,6 +32,8 @@ from ysmart.frontend import sqltokens
 
 import antlr3
 import unittest
+
+base_tests_path = './tests/ysmart/test'
 
 class Test(unittest.TestCase):
 
@@ -60,7 +63,7 @@ class Test(unittest.TestCase):
 
     #################################
     
-    def sql2sparkScaffold(self, input_file_name):
+    def sql2sparkScaffold(self, relative_path):
         '''
         Parses the given SQL file and compares the parse tree with the expected parse tree
         '''
@@ -71,10 +74,8 @@ class Test(unittest.TestCase):
                          ---------------------------------------------------------------
                          Diff: %s
                          ==============================================================="""
-        print("="*40)
-        print(input_file_name)
-        
-        with open(input_file_name) as sqlFile:
+        path = os.path.join(base_tests_path, relative_path)
+        with open(path) as sqlFile:
             # TODO Meisam: Make the grammar case insensitive?
             query = sqlFile.read().upper()
             stringStream = antlr3.StringStream(query)

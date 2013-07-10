@@ -16,6 +16,7 @@
    limitations under the License.
 
 """
+import os.path
 
 '''
 Testcases for YSmart front end
@@ -31,6 +32,8 @@ from ysmart.frontend.sql2xml import toXml
 import antlr3
 import difflib
 import unittest
+
+base_tests_path = './tests/ysmart/test'
 
 class Test(unittest.TestCase):
 
@@ -143,7 +146,7 @@ class Test(unittest.TestCase):
 
     #################################
     
-    def sql2XmlTestScaffold(self, inputFileName):
+    def sql2XmlTestScaffold(self, relative_path):
         '''
         Parses the given SQL file and compares the parse tree with the expected parse tree
         '''
@@ -154,11 +157,13 @@ class Test(unittest.TestCase):
                          ---------------------------------------------------------------
                          Diff: %s
                          ==============================================================="""
-        producedXml = toXml(open(inputFileName)).upper()
+        path = os.path.join(base_tests_path, relative_path)
+
+        producedXml = toXml(open(path)).upper()
         
-        expectedXml = open(inputFileName + ".xml").read().upper()
+        expectedXml = open(path + ".xml").read().upper()
         diff = difflib.ndiff(expectedXml.splitlines(1), producedXml.splitlines(1))
-        self.assertEqual(expectedXml, producedXml, errorMsg % (inputFileName, expectedXml, producedXml, ''.join(diff)))
+        self.assertEqual(expectedXml, producedXml, errorMsg % (path, expectedXml, producedXml, ''.join(diff)))
 
 if __name__ == "__main__":
     # import sys;sys.argv = ['', 'Test.testParser']
