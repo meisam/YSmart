@@ -1,5 +1,7 @@
 include *.txt
-recursive-include tests *.py *.sql *.xml *.java *.schema
+include tests/ysmart/test/ssb_test/*
+include tests/ysmart/test/unit_tests/*
+include tests/ysmart/test/tpch_test/*
 exclude result
 exclude build
-exclude dist
+exclude disttests/ysmart/test/ssb_test/q1_3.sql.xml
