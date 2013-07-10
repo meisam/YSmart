@@ -17,9 +17,8 @@
 
 
 
-import ystree
-import sys
 import copy
+from ysmart.backend import ystree
 
 ####
 ####__get_input_correlation__ parses the tree and put the node that scans the same node into a hash table.

@@ -16,7 +16,6 @@
    limitations under the License.
 
 """
-from mako.exceptions import RuntimeException
 
 '''
 Testcases for YSmart front end
@@ -24,14 +23,11 @@ Created on May 7, 2013
 
 @author: fathi
 '''
-import sys
-import difflib
- 
-from ysmart.frontend.YSmartLexer import *  # import all the tokens
-from ysmart.frontend.YSmartParser import *
-from antlr3.tokens import CommonToken
 
-import sqltokens
+from ysmart.frontend.YSmartLexer import * # import all the tokens
+from ysmart.frontend.YSmartParser import *
+
+from ysmart.frontend import sqltokens
 
 import antlr3
 import unittest
@@ -139,7 +135,7 @@ def visit_tree(node):
     elif node.type == 0: # root node
         return "[Gotta be the root: %s %s]" % (node, childs_strings)
     else:
-        raise RuntimeException("Unknown type %s for node %s" % (node.type, node))
+        raise RuntimeError("Unknown type %s for node %s" % (node.type, node))
 
 def visit_t_select(node):
     print()

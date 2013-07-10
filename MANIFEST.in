@@ -1,5 +1,5 @@
 include *.txt
-recursive-include test *.sql *.xml *.java *.schema
+recursive-include tests *.py *.sql *.xml *.java *.schema
 exclude result
 exclude build
 exclude dist

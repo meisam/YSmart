@@ -16,8 +16,6 @@
    limitations under the License.
 
 """
-from sql2xml import toXml
-import os
 
 '''
 Testcases for YSmart front end
@@ -25,21 +23,13 @@ Created on May 7, 2013
 
 @author: fathi
 '''
-import sys
+
+from ysmart.backend import correlation, ystree, config
+from ysmart.backend.code_gen import JobWriter, generate_code, base_name, \
+    INITIAL_CLASSNAME_SUFFIX
+from ysmart.frontend.sql2xml import toXml
 import difflib
-
-import config
-from ysmart.frontend.YSmartLexer import * # import all the tokens
-from ysmart.frontend.YSmartParser import *
-from antlr3.tokens import CommonToken
-
-import antlr3
-import unittest
-import ystree
-import correlation
-from sql2xml import toXml
-from code_gen import JobWriter, generate_code, base_name, INITIAL_CLASSNAME_SUFFIX
-
+import os
 import unittest
 
 class TestJobGenerator(unittest.TestCase):

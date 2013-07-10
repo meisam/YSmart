@@ -16,13 +16,12 @@
 """
 
 
-import sys
 import commands
 import os.path
 import copy
-import ystree
-import correlation
-import config
+from ysmart.backend import ystree
+from ysmart.backend import correlation
+from ysmart.backend import config
 
 # #input exp should be YFuncExp
 

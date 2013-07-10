@@ -24,11 +24,10 @@ Created on May 6, 2013
 @author: Meisam
 '''
 
-import sys
 import antlr3
 import antlr3.tree
-from YSmartLexer import *
-from YSmartParser import *
+from ysmart.frontend.YSmartLexer import *
+from ysmart.frontend.YSmartParser import *
 
 
 def toXml(sqlFile):

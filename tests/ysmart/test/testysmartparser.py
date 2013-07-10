@@ -23,16 +23,14 @@ Created on May 7, 2013
 
 @author: fathi
 '''
-import sys
-import difflib
- 
+
+from antlr3.tokens import CommonToken
 from ysmart.frontend.YSmartLexer import *  # import all the tokens
 from ysmart.frontend.YSmartParser import *
-from antlr3.tokens import CommonToken
-
-import antlr3
-import unittest
 from ysmart.frontend.sql2xml import toXml
+import antlr3
+import difflib
+import unittest
 
 class Test(unittest.TestCase):
 
