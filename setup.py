@@ -31,9 +31,10 @@ setup(
     description=('YSmart is a correlation aware SQL-to-MapReduce translator'),
     license='http://www.apache.org/licenses/LICENSE-2.0',
     packages=['ysmart', 'ysmart.frontend', 'ysmart.backend', 'ysmart.test'],
-    package_dir={'ysmart':'.',
-                  'ysmart.frontend': 'SQL2XML',
-                  'ysmart.backend': 'XML2MapReduce',
+    package_dir={'ysmart':'src/ysmart',
+                  'ysmart.frontend': 'src/ysmart/frontend',
+                  'ysmart.backend': 'src/ysmart/backend',
+                  'ysmart.test': 'tests/ysmart/test'
                 },
-    scripts=['translate.py'],
+    scripts=['scripts/ysmart.py'],
 )
