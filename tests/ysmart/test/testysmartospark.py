@@ -17,7 +17,6 @@
 
 """
 import os.path
-from reportlab.lib.validators import isInt
 from ysmart.backend.ystree import GroupByNode, TwoJoinNode, SelectProjectNode, \
     TableNode, OrderByNode
 from types import NoneType
