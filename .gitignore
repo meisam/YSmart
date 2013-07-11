@@ -3,3 +3,5 @@
 /MANIFEST
 /result
 /.externalToolBuilders
+*.dot
+*.svg
