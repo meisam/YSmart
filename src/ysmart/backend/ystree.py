@@ -824,7 +824,7 @@ class SelectProjectNode(QueryPlanTreeBase):
         return self.child.get_mapoutput(table_name)
 
     def get_mapfilter(self, table_name):
-        return self, child.get_mapfilter(table_name)
+        return self.child.get_mapfilter(table_name)
 
     def set_composite(self, c_node, node):
         if self.parent is not None:
