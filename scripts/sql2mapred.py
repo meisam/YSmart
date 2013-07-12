@@ -22,18 +22,9 @@ import os;
 import subprocess;
 import sys;
 
-print ("WE ARE HERE 111")
+from ysmart.frontend import sql2xml
 
-import ysmart
-
-print("WE ARE PASSED TO HERE >>>>!>!>!>")
-
-from ysmart import frontend
-# .sql2xml
-
-print("LETS SEE WHAT HAPPENS")
-
-import ysmart.backend
+from ysmart.backend import code_gen
 
 CURRENT_DIR = os.getcwd()
 EXEC_DIR = 'bin';
