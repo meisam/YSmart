@@ -16,7 +16,6 @@
    limitations under the License.
 
 """
-from numpy.ma.core import absolute
 
 '''
 Testcases for YSmart front end
