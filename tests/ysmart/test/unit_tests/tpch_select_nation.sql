@@ -1,0 +1,1 @@
+select N_NAME, N_REGIONKEY from NATION;
