@@ -42,7 +42,7 @@ class Test(BaseTestCase):
 
         code = translator.spark_code(tree_node)
         
-        with open('/home/fathi/workspace/spark/examples/src/main/scala/spark/ysmart-examples/TestSpark.scala', 'w') as job_file:
+        with open('/home/fathi/workspace/spark/examples/src/main/scala/spark/examples/TestSpark.scala', 'w') as job_file:
             job_file.write(code)
             job_file.flush()
 

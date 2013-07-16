@@ -28,7 +28,7 @@ object {job_name} {{
     val dataset = sc.textFile("/home/fathi/hadoop-file-system/tpch-data/1gb-sample/{file_name}.tbl")
     
     val nations = dataset.map(line => {select_code})
-    nations.saveAsTextFile("/home.fathi/Desktop/select-nation")
+    nations.saveAsTextFile("/home/fathi/Desktop/select-nation")
 
     Console.print("number of nations=" + nations.count)
   }}
@@ -73,9 +73,9 @@ def visit_ystree(node, schema_dictionary):
             table_name = node.table_name
             column_name = node.select_list.dict_exp_and_alias[column]
             column_index = schema_dictionary[table_name].column_name_list.index(column_name)
-            select_columns.append('line.split("|")({column_index})'.format(column_index=column_index))
+            select_columns.append(r'line.split("\\|")({column_index})'.format(column_index=column_index))
             
-        result = ' + '.join(select_columns)
+        result = ' + "\" +'.join(select_columns)
         return result
                               
     elif isinstance(node, NoneType):
