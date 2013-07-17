@@ -37,7 +37,7 @@ object {job_name} {{
 """
 
 
-def spark_code(node):
+def spark_code(node, job_name):
     """ returns a list of JobWriters for the given tree
     """
     
@@ -47,7 +47,7 @@ def spark_code(node):
     result = visit_ystree(node, global_table_dict)
     
     code = _job_template.format(select_code=result, imports=""
-                                , job_name="TestSpark", file_name="nation")
+                                , job_name=job_name, file_name="nation")
     
     return code
 
