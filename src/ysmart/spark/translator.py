@@ -75,7 +75,8 @@ def visit_ystree(node, schema_dictionary):
             column_index = schema_dictionary[table_name].column_name_list.index(column_name)
             select_columns.append(r'line.split("\\|")({column_index})'.format(column_index=column_index))
             
-        result = ' + "\" +'.join(select_columns)
+        result = ' + "|" +'.join(select_columns)
+        
         return result
                               
     elif isinstance(node, NoneType):
