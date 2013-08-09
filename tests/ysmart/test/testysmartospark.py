@@ -213,6 +213,10 @@ class Test(unittest.TestCase):
 
     def test_tpch5queryystree(self) :
         self.ystree2graph("tpch_test/tpch5query.sql", "tpch_test/tpch.schema")
+
+    def test_sample_query(self) :
+        self.ystree2graph("unit_tests/tpch_select_nation.sql", "tpch_test/tpch.schema")
+
     #################################
     
     def sql2sparkScaffold(self, relative_path):
