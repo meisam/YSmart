@@ -4,8 +4,9 @@ Created on Jul 15, 2013
 @author: fathi
 '''
 from types import NoneType
+from ysmart.backend.code_gen import math_func_dict
 from ysmart.backend.ystree import SelectProjectNode, GroupByNode, OrderByNode, \
-    TwoJoinNode, TableNode, global_table_dict
+    TwoJoinNode, TableNode, global_table_dict, YRawColExp, YConsExp, YFuncExp
 
 
 _job_template = """
@@ -156,41 +157,57 @@ def _scala_join_condition(join_node):
         raise
 
 
-def lookup_column_index(column_exp, child, scheme):
-    column_name = scheme[column_exp]
-    print("DEBUG: column name: {0}".format(column_name))
+def lookup_column_index(column_exp, node):
+    return column_exp.column_name
 
-    for column in child.select_list.tmp_exp_list:
-        if child.select_list.dict_exp_and_alias[column] == column_name:
-            return child.select_list.tmp_exp_list.index(column)
-    raise # not found
+def _expr_to_scala(node, exp):
+    '''
+    Converts the given SQL expression to Scala expression. 
+    '''
+    scheme = node.select_list.dict_exp_and_alias
+    left_child = node.left_child
+    right_child = node.right_child
+    
+    assert left_child
+    assert right_child
 
-def _scala_join_flat_map(join_node):
+    if isinstance(exp, YRawColExp):
+        if exp.table_name == "LEFT":
+            column_index = lookup_column_index(exp, left_child)
+            return 'x._1({index})'.format(index=column_index)
+        elif exp.table_name == "RIGHT":
+            column_index = lookup_column_index(exp, right_child)
+            return 'x._2({index})'.format(index=column_index)
+        else:
+            raise
+    elif isinstance(exp, YConsExp):
+        return exp.cons_value
+    elif isinstance(exp, YFuncExp):
+        params = exp.parameter_list
+        assert len(params) == 2
+        assert math_func_dict[exp.func_name]
+        operation = math_func_dict[exp.func_name]
+        expr1 = _expr_to_scala(node, params[0])
+        expr2 = _expr_to_scala(node, params[1])
+        return '({param1}{operation}{param2})'.format(
+                 param1=expr1, operation=operation, param2=expr2)
+    else:
+        raise RuntimeError(repr(exp))
+
+
+def _scala_join_project(join_node):
     """
     This method should be used to remove columns that should not appear in the result of the join.
     These columns are columns that are used in join but are not selected as part of the map.
     """
-    left_child_indices = []
-    right_child_indices = []
-    scheme = join_node.select_list.dict_exp_and_alias
-    left_child = join_node.left_child
-    right_child = join_node.right_child
-    
-    for column_exp in join_node.select_list.tmp_exp_list:
-        if column_exp.table_name == "LEFT":
-            column_index = lookup_column_index(column_exp, left_child, scheme)
-            left_child_indices.append(column_index)
-        elif column_exp.table_name == "RIGHT":
-            column_index = lookup_column_index(column_exp, right_child, scheme)
-            right_child_indices.append(column_index)
-        else:
-            raise
-        
-    print("DEBUG: Left column indices = {0}; right column indices = {1}".format(left_child_indices , right_child_indices))
-    left_child_filter = ['x._1({index})'.format(index=column_index) for column_index in left_child_indices]
-    right_child_filter = ['x._2({index})'.format(index=column_index) for column_index in right_child_indices]
-    all_columns = left_child_filter + right_child_filter
-    return 'x => (' + ', '.join(all_columns) + ')'
+    expr_list = join_node.select_list.tmp_exp_list
+    all_columns = [_expr_to_scala(join_node, exp) for exp in expr_list]
+    if len(all_columns) > 1:
+        return 'x => (' + ', '.join(all_columns) + ')'
+    elif len(all_columns) == 1:
+        return 'x => '+  all_columns[0]
+    else:
+        raise RuntimeError(repr(join_node))
 
 def visit_ystree(node, code_emitter):
 
@@ -198,7 +215,8 @@ def visit_ystree(node, code_emitter):
     db_scheme = global_table_dict
     
     if isinstance(node, GroupByNode):
-        return visit_ystree_groupby(node, code_emitter)
+        child_rdd = visit_ystree(node.child, code_emitter)
+        return code_emitter.emit_group_by(node, child_rdd)
     elif isinstance(node, SelectProjectNode):
         for table in node.in_table_list:
             print ("TABLE = {tbl}".format(tbl=table))
@@ -207,13 +225,11 @@ def visit_ystree(node, code_emitter):
     elif isinstance(node, OrderByNode):
         return visit_ystree_orderby(node.child, code_emitter)
     elif isinstance(node, TwoJoinNode):
-        rdd_name_left = visit_ystree(node.left_child, code_emitter)
-        rdd_name_right = visit_ystree(node.right_child, code_emitter)
-        condition = node.where_condition.where_condition_exp
-#         parameters_list = condition.parameters_list
-        join_condition_filter = _scala_join_condition(node)
-        join_project_flat_map = _scala_join_flat_map(node) 
-        return code_emitter.emit_join(rdd_name_left, rdd_name_right, join_condition_filter, join_project_flat_map)
+        left_rdd = visit_ystree(node.left_child, code_emitter)
+        right_rdd = visit_ystree(node.right_child, code_emitter)
+        join_condition = _scala_join_condition(node)
+        join_project = _scala_join_project(node) 
+        return code_emitter.emit_join(left_rdd, right_rdd, join_condition, join_project)
     elif isinstance(node, TableNode):
         table_name = node.table_name
         column_indices = [column.column_name for column in node.select_list.tmp_exp_list]
