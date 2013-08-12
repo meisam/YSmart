@@ -130,7 +130,12 @@ def _scala_join_condition(join_node):
     Cartesian product of its left child and its right child.
     """
     
-    condition_exp = join_node.where_condition.where_condition_exp
+    if join_node.where_condition:
+        condition_exp = join_node.where_condition.where_condition_exp
+    elif join_node.join_condition:
+        condition_exp = join_node.join_condition.where_condition_exp
+    else:
+        raise
     func_name = condition_exp.func_name
     parameter_list = condition_exp.parameter_list
     
