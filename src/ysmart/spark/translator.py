@@ -74,10 +74,24 @@ class SparkCodeEmiter(object):
         self._indent_dept -= 1
         self._emit('}')
 
-    def emit_table_read(self, table_name, column_indices):
+    def emit_table_read(self, table_name, columns):
         rdd_name = self._new_rdd_name()
-        select_columns = [r'line.split("\\|")({column_index})'.format(column_index=column_index) for column_index in column_indices]
-        select_code = 'Seq(' + ', '.join(select_columns) + ')'
+        
+        # FIXME Meisam: add code to convert date ad text types
+        type_function_map = {"INTEGER":".toInt", "DECIMAL":".toFloat", "TEXT":"", "DATE":""}
+        typed_columns = []
+        for (column_index, column_type) in columns:
+            column_expr = r'line.split("\\|")({column_index})'.format(column_index=column_index)
+            column_expr += type_function_map[column_type]
+            typed_columns.append(column_expr)
+        
+        if (len(typed_columns) > 1):
+            select_code = '({columns})'.format(columns= ', '.join(typed_columns))
+        elif (len(typed_columns) == 1):
+            select_code = 'Tuple1({column})'.format(column=typed_columns[0])
+        else:
+            raise RuntimeError()
+        
         self._emit('val {rdd_name} = sc.textFile(dbDir + "/{table_name}.tbl").map(line => {select_code})'.format(
                 rdd_name=rdd_name, table_name=table_name.lower(), select_code=select_code))
         return rdd_name
@@ -243,8 +257,8 @@ def visit_ystree(node, code_emitter):
     elif isinstance(node, TableNode):
         table_name = node.table_name
         column_indices = [column.column_name for column in node.select_list.tmp_exp_list]
-        print('columns {0}'.format(str(column_indices)))
-        return code_emitter.emit_table_read(table_name, column_indices)
+        column_types = [column.column_type  for column in node.select_list.tmp_exp_list]
+        return code_emitter.emit_table_read(table_name, zip(column_indices, column_types))
     elif isinstance(node, NoneType):
         print("ROOT")
     else:
