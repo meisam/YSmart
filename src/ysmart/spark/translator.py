@@ -25,6 +25,7 @@ object {job_name} {{
 """
 
 class SparkCodeEmiter(object):
+    _job_name = 'YSmartSparkJob'
     _table_scheme = None
     _spark_home = ''
     _rdd_cntr = 0
@@ -32,9 +33,10 @@ class SparkCodeEmiter(object):
     _indent_dept = 0
     _indent_width = 2
 
-    def __init__(self, table_schema, spark_home):
+    def __init__(self, table_schema, spark_home, job_name='YSmartSparkJob'):
         self._table_scheme = table_schema
         self._spark_home = spark_home
+        self._job_name = job_name
 
     def get_code(self):
         return self._code
@@ -57,7 +59,7 @@ class SparkCodeEmiter(object):
         self._emit('import SparkContext._')
 
     def _emit_object_def(self):
-        self._emit(_job_template.format(job_name='YSmartSparkJob', spark_home=self._spark_home))
+        self._emit(_job_template.format(job_name=self._job_name, spark_home=self._spark_home))
 
     def emit_header(self):
         self._emit_package_name()
@@ -99,14 +101,14 @@ class SparkCodeEmiter(object):
         return join_rdd
 
     def emit_save_to_file(self, rdd_name):
-        self._emit('{rdd}.saveAsTextFile(outputDir)'.format(rdd=rdd_name))
+        self._emit('{rdd}.saveAsTextFile(outputDir + "/{sub_path}")'.format(rdd=rdd_name, sub_path=self._job_name))
 
 def spark_code(node, job_name, spark_home):
     # /home/fathi/workspace/spark/examples/target/scala-2.9.3/spark-examples_2.9.3-0.8.0-SNAPSHOT.jar
     
     global global_table_dict
     
-    code_emitter = SparkCodeEmiter(global_table_dict, spark_home)
+    code_emitter = SparkCodeEmiter(global_table_dict, spark_home, job_name)
     code_emitter.emit_header();
     rdd_name = visit_ystree(node, code_emitter)
     code_emitter.emit_save_to_file(rdd_name)
