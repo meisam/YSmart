@@ -101,6 +101,12 @@ class SparkCodeEmiter(object):
                    .format(join_rdd=join_rdd , cartesian_rdd=cartesian_rdd, condition=join_condition_filter, join_project_flat_map=join_project_flat_map))
         return join_rdd
 
+    def emit_group_by(self, grouby_node, child_rdd):
+        rdd = self._new_rdd_name()
+        self._emit('val {rdd_name} = {child_rdd}.groupBy({map_expression})'
+                   .format(rdd_name=rdd, child_rdd=child_rdd, map_expression="x => x"))
+        return rdd
+    
     def emit_save_to_file(self, rdd_name):
         self._emit('{rdd}.saveAsTextFile(outputDir + "/{sub_path}")'.format(rdd=rdd_name, sub_path=self._job_name))
 
