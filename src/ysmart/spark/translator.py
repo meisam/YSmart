@@ -86,7 +86,7 @@ class SparkCodeEmiter(object):
             typed_columns.append(column_expr)
         
         if (len(typed_columns) > 1):
-            select_code = '({columns})'.format(columns= ', '.join(typed_columns))
+            select_code = '({columns})'.format(columns=', '.join(typed_columns))
         elif (len(typed_columns) == 1):
             select_code = 'Tuple1({column})'.format(column=typed_columns[0])
         else:
@@ -230,7 +230,7 @@ def _scala_join_project(join_node):
     if len(all_columns) > 1:
         return 'x => (' + ', '.join(all_columns) + ')'
     elif len(all_columns) == 1:
-        return 'x => '+  all_columns[0]
+        return 'x => ' + all_columns[0]
     else:
         raise RuntimeError(repr(join_node))
 
@@ -242,10 +242,7 @@ def visit_ystree(node, code_emitter):
         child_rdd = visit_ystree(node.child, code_emitter)
         return code_emitter.emit_group_by(node, child_rdd)
     elif isinstance(node, SelectProjectNode):
-        for table in node.in_table_list:
-            print ("TABLE = {tbl}".format(tbl=table))
-        else:
-            print("No table found")
+        raise RuntimeError("Not implemented")
     elif isinstance(node, OrderByNode):
         return visit_ystree_orderby(node.child, code_emitter)
     elif isinstance(node, TwoJoinNode):
@@ -260,7 +257,7 @@ def visit_ystree(node, code_emitter):
         column_types = [column.column_type  for column in node.select_list.tmp_exp_list]
         return code_emitter.emit_table_read(table_name, zip(column_indices, column_types))
     elif isinstance(node, NoneType):
-        print("ROOT")
+        raise RuntimeError("Not implemented")
     else:
         raise RuntimeError(node.__class__.__name__)
 
