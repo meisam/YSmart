@@ -223,7 +223,6 @@ def _scala_join_project(join_node):
 def visit_ystree(node, code_emitter):
 
     global global_table_dict
-    db_scheme = global_table_dict
     
     if isinstance(node, GroupByNode):
         child_rdd = visit_ystree(node.child, code_emitter)
