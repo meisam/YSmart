@@ -7,6 +7,7 @@ from types import NoneType
 from ysmart.backend.code_gen import math_func_dict
 from ysmart.backend.ystree import SelectProjectNode, GroupByNode, OrderByNode, \
     TwoJoinNode, TableNode, global_table_dict, YRawColExp, YConsExp, YFuncExp
+from coverage.backward import range
 
 
 _job_template = """
@@ -150,12 +151,9 @@ def _scala_join_condition(join_node):
     Cartesian product of its left child and its right child.
     """
     
-    if join_node.where_condition:
-        condition_exp = join_node.where_condition.where_condition_exp
-    elif join_node.join_condition:
-        condition_exp = join_node.join_condition.where_condition_exp
-    else:
-        raise
+    assert join_node.join_condition
+    condition_exp = join_node.join_condition.where_condition_exp
+
     func_name = condition_exp.func_name
     parameter_list = condition_exp.parameter_list
     
@@ -174,16 +172,23 @@ def _scala_join_condition(join_node):
             raise
         
         assert left_param.column_type == right_param.column_type
-        left_columns_index = left_param.column_name
-        right_columns_index = right_param.column_name
-        return 'x => x._1({left_columns_index}) == x._2({right_columns_index})'.format(
-            left_columns_index=left_columns_index, right_columns_index=right_columns_index)
+        column_index = lookup_column_index(left_param, join_node.left_child)
+        left_column = 'x._1._{index}'.format(index=column_index + 1) # Scala starts tuple indexes from 1 and not from 0
+        column_index = lookup_column_index(right_param, join_node.right_child)
+        right_column = 'x._2._{index}'.format(index=column_index + 1) # Scala starts tuple indexes from 1 and not from 0
+
+        return 'x => {left_column} {operation} {right_column}'.format(
+            left_column=left_column, right_column=right_column, operation='==')
     else:
         raise
 
 
 def lookup_column_index(column_exp, node):
-    return column_exp.column_name
+    columns_list = node.select_list.tmp_exp_list
+    for (column, index) in zip (columns_list, range(0, len(columns_list))):
+        if column.column_name == column_exp.column_name:
+            return index
+    raise RuntimeError('{0} not found in {1}'.format(column_exp, node))
 
 def _expr_to_scala(node, exp):
     '''
@@ -198,10 +203,10 @@ def _expr_to_scala(node, exp):
 
     if isinstance(exp, YRawColExp):
         if exp.table_name == "LEFT":
-            column_index = lookup_column_index(exp, left_child)
+            column_index = exp.column_name
             return 'x._1({index})'.format(index=column_index)
         elif exp.table_name == "RIGHT":
-            column_index = lookup_column_index(exp, right_child)
+            column_index = exp.column_name
             return 'x._2({index})'.format(index=column_index)
         else:
             raise
