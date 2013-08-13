@@ -173,9 +173,9 @@ def _scala_join_condition(join_node):
         
         assert left_param.column_type == right_param.column_type
         column_index = lookup_column_index(left_param, join_node.left_child)
-        left_column = 'x._1._{index}'.format(index=column_index + 1) # Scala starts tuple indexes from 1 and not from 0
+        left_column = 'x._1._{index}'.format(index=column_index + 1)  # Scala starts tuple indexes from 1 and not from 0
         column_index = lookup_column_index(right_param, join_node.right_child)
-        right_column = 'x._2._{index}'.format(index=column_index + 1) # Scala starts tuple indexes from 1 and not from 0
+        right_column = 'x._2._{index}'.format(index=column_index + 1)  # Scala starts tuple indexes from 1 and not from 0
 
         return 'x => {left_column} {operation} {right_column}'.format(
             left_column=left_column, right_column=right_column, operation='==')
@@ -204,10 +204,10 @@ def _expr_to_scala(node, exp):
     if isinstance(exp, YRawColExp):
         if exp.table_name == "LEFT":
             column_index = exp.column_name
-            return 'x._1({index})'.format(index=column_index)
+            return 'x._1._{index}'.format(index=column_index + 1)  # Scala starts tuple indexes from 1 and not from 0
         elif exp.table_name == "RIGHT":
             column_index = exp.column_name
-            return 'x._2({index})'.format(index=column_index)
+            return 'x._2._{index}'.format(index=column_index + 1)  # Scala starts tuple indexes from 1 and not from 0
         else:
             raise
     elif isinstance(exp, YConsExp):
