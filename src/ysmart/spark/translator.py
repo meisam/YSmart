@@ -3,11 +3,11 @@ Created on Jul 15, 2013
 
 @author: fathi
 '''
+from coverage.backward import range
 from types import NoneType
 from ysmart.backend.code_gen import math_func_dict
 from ysmart.backend.ystree import SelectProjectNode, GroupByNode, OrderByNode, \
     TwoJoinNode, TableNode, global_table_dict, YRawColExp, YConsExp, YFuncExp
-from coverage.backward import range
 
 
 _job_template = """
@@ -25,6 +25,20 @@ object {job_name} {{
     val sc = new SparkContext(master, "{job_name}",
       "{spark_home}", Seq(), Map())
 """
+
+def _condition_to_scala(expr, node):
+    logical_funtions = {"AND":" && ", "OR":" || ", "EQ":" == ", "GTH":" > ", "LTH":" < ", "NOT_EQ":" != ", "GEQ":" >= ", "LEQ":" <= "}
+    
+    if isinstance(expr, YRawColExp):
+        column_index = expr.column_name
+        return 'x._{0}'.format(column_index + 1)
+    elif isinstance(expr, YConsExp):
+        return expr.cons_value
+    elif isinstance(expr, YFuncExp):
+        condition_str = [_condition_to_scala(param, node) for param in expr.parameter_list]
+        return '(' + logical_funtions[expr.func_name].join(condition_str) + ')'
+    else:
+        raise RuntimeError(repr(expr))
 
 class SparkCodeEmiter(object):
     _job_name = 'YSmartSparkJob'
@@ -75,27 +89,61 @@ class SparkCodeEmiter(object):
         self._indent_dept -= 1
         self._emit('}')
 
-    def emit_table_read(self, table_name, columns):
-        rdd_name = self._new_rdd_name()
+    def emit_table_read(self, node):
+        
+        # Scan the table
+        table_name = node.table_name
+        global global_table_dict
+        scan_rdd = self._new_rdd_name()
+        all_columns = global_table_dict[table_name].column_list
+        columns_count = len(all_columns)
         
         # FIXME Meisam: add code to convert date ad text types
         type_function_map = {"INTEGER":".toInt", "DECIMAL":".toFloat", "TEXT":"", "DATE":""}
-        typed_columns = []
-        for (column_index, column_type) in columns:
-            column_expr = r'line.split("\\|")({column_index})'.format(column_index=column_index)
-            column_expr += type_function_map[column_type]
-            typed_columns.append(column_expr)
+        projected_columns = []
+        for (column, index) in zip (all_columns, range(0, columns_count)):
+            column_expr = r'line.split("\\|")({column_index})'.format(column_index=index)
+            column_expr += type_function_map[column.column_type]
+            projected_columns.append(column_expr)
+
+        if columns_count >= 1:
+            line_split = '(' +  ', '.join(projected_columns) + ')'
+        elif columns_count == 1:
+            line_split = 'Tuple1(' +  ', '.join(projected_columns) + ')'
+        else:
+            raise
+
+        self._emit('val {scan_rdd} = sc.textFile(dbDir + "/{table_name}.tbl").map(line => {line_split})'.format(
+                scan_rdd=scan_rdd, table_name=table_name.lower(), line_split=line_split))
+
+        # Select needed rows
+        if node.where_condition:
+            expr = node.where_condition.where_condition_exp
+            select_code = _condition_to_scala(expr, node)
+
+        select_rdd = self._new_rdd_name()
+        self._emit('val {select_rdd} = {scan_rdd}.filter(x => {select_code})'.format(
+                select_rdd=select_rdd, scan_rdd=scan_rdd, select_code=select_code))
+
+        # Project needed columns
+        projected_columns = []
+        for column in node.select_list.tmp_exp_list:
+            column_index  = column.column_name + 1 # + 1 for 1-based tuples in Scala
+            column_expr = r'x._{column_index}'.format(column_index=column_index)
+            projected_columns.append(column_expr)
         
-        if (len(typed_columns) > 1):
-            select_code = '({columns})'.format(columns=', '.join(typed_columns))
-        elif (len(typed_columns) == 1):
-            select_code = 'Tuple1({column})'.format(column=typed_columns[0])
+        if (len(projected_columns) > 1):
+            project_code = '({columns})'.format(columns=', '.join(projected_columns))
+        elif (len(projected_columns) == 1):
+            project_code = 'Tuple1({column})'.format(column=projected_columns[0])
         else:
             raise RuntimeError()
         
-        self._emit('val {rdd_name} = sc.textFile(dbDir + "/{table_name}.tbl").map(line => {select_code})'.format(
-                rdd_name=rdd_name, table_name=table_name.lower(), select_code=select_code))
-        return rdd_name
+        project_rdd = self._new_rdd_name()
+        self._emit('val {project_rdd} = {select_rdd}.map(x => {project_code})'.format(
+                project_rdd=project_rdd, select_rdd=select_rdd, project_code=project_code))
+        
+        return project_rdd
     
     def emit_join(self, rdd_name_left, rdd_name_right, join_condition_filter, join_project_flat_map):
         """
@@ -257,10 +305,7 @@ def visit_ystree(node, code_emitter):
         join_project = _scala_join_project(node) 
         return code_emitter.emit_join(left_rdd, right_rdd, join_condition, join_project)
     elif isinstance(node, TableNode):
-        table_name = node.table_name
-        column_indices = [column.column_name for column in node.select_list.tmp_exp_list]
-        column_types = [column.column_type  for column in node.select_list.tmp_exp_list]
-        return code_emitter.emit_table_read(table_name, zip(column_indices, column_types))
+        return code_emitter.emit_table_read(node)
     elif isinstance(node, NoneType):
         raise RuntimeError("Not implemented")
     else:
