@@ -244,7 +244,6 @@ def _expr_to_scala(node, exp):
     '''
     Converts the given SQL expression to Scala expression. 
     '''
-    scheme = node.select_list.dict_exp_and_alias
     left_child = node.left_child
     right_child = node.right_child
     
