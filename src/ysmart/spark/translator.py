@@ -106,7 +106,7 @@ class SparkCodeEmiter(object):
             column_expr += type_function_map[column.column_type]
             projected_columns.append(column_expr)
 
-        if columns_count >= 1:
+        if columns_count > 1:
             line_split = '(' +  ', '.join(projected_columns) + ')'
         elif columns_count == 1:
             line_split = 'Tuple1(' +  ', '.join(projected_columns) + ')'
