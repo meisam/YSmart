@@ -121,9 +121,11 @@ class SparkCodeEmiter(object):
             expr = node.where_condition.where_condition_exp
             select_code = _condition_to_scala(expr, node)
 
-        select_rdd = self._new_rdd_name()
-        self._emit('val {select_rdd} = {scan_rdd}.filter(x => {select_code})'.format(
+            select_rdd = self._new_rdd_name()
+            self._emit('val {select_rdd} = {scan_rdd}.filter(x => {select_code})'.format(
                 select_rdd=select_rdd, scan_rdd=scan_rdd, select_code=select_code))
+        else:
+            select_rdd = scan_rdd
 
         # Project needed columns
         projected_columns = []
