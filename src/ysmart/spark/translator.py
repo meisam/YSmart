@@ -3,9 +3,8 @@ Created on Jul 15, 2013
 
 @author: fathi
 '''
-from coverage.backward import range
 from types import NoneType
-from ysmart.backend.code_gen import math_func_dict
+from ysmart.backend.code_gen import math_func_dict, agg_func_list
 from ysmart.backend.ystree import SelectProjectNode, GroupByNode, OrderByNode, \
     TwoJoinNode, TableNode, global_table_dict, YRawColExp, YConsExp, YFuncExp
 
@@ -39,6 +38,33 @@ def _condition_to_scala(expr, node):
         return '(' + logical_funtions[expr.func_name].join(condition_str) + ')'
     else:
         raise RuntimeError(repr(expr))
+
+
+def _select_list_to_scala(column_expr, node):
+    if isinstance(column_expr, YRawColExp):
+        return 'x._{index}'.format(index=column_expr.column_name + 1)
+    elif isinstance(column_expr, YConsExp):
+        if column_expr.cons_type in ["DECIMAL", "INTEGER"]:
+            return str(column_expr.cons_value)
+        else:
+            return column_expr.cons_value
+    elif isinstance(column_expr, YFuncExp):
+        func_name = column_expr.func_name
+        params = [_select_list_to_scala(parameter_expr, node) for parameter_expr in column_expr.parameter_list]
+        if func_name in agg_func_list:
+            if len(params) == 1:
+                return params[0]
+            elif len(params) > 1:
+                return ', '.join(params)
+            else:
+                raise 
+        elif func_name in math_func_dict:
+            operation = math_func_dict[column_expr.func_name]
+            return '(' + operation.join(params) + ')'
+        else:
+            raise
+    else:
+        raise
 
 class SparkCodeEmiter(object):
     _job_name = 'YSmartSparkJob'
@@ -107,9 +133,9 @@ class SparkCodeEmiter(object):
             projected_columns.append(column_expr)
 
         if columns_count > 1:
-            line_split = '(' +  ', '.join(projected_columns) + ')'
+            line_split = '(' + ', '.join(projected_columns) + ')'
         elif columns_count == 1:
-            line_split = 'Tuple1(' +  ', '.join(projected_columns) + ')'
+            line_split = 'Tuple1(' + ', '.join(projected_columns) + ')'
         else:
             raise
 
@@ -130,7 +156,7 @@ class SparkCodeEmiter(object):
         # Project needed columns
         projected_columns = []
         for column in node.select_list.tmp_exp_list:
-            column_index  = column.column_name + 1 # + 1 for 1-based tuples in Scala
+            column_index = column.column_name + 1  # + 1 for 1-based tuples in Scala
             column_expr = r'x._{column_index}'.format(column_index=column_index)
             projected_columns.append(column_expr)
         
@@ -166,14 +192,52 @@ class SparkCodeEmiter(object):
                    .format(join_rdd=join_rdd , cartesian_rdd=cartesian_rdd, condition=join_condition_filter, join_project_flat_map=join_project_flat_map))
         return join_rdd
 
-    def emit_group_by(self, grouby_node, child_rdd):
-        rdd = self._new_rdd_name()
-        self._emit('val {rdd_name} = {child_rdd}.groupBy({map_expression})'
-                   .format(rdd_name=rdd, child_rdd=child_rdd, map_expression="x => x"))
-        return rdd
-    
+    def emit_group_by(self, node, child_rdd):
+        group_by_rdd = self._new_rdd_name()
+        group_by_columns = ['x._{0}'.format(column.column_name+1) for column in node.group_by_clause.groupby_exp_list]
+        
+        if len(group_by_columns) == 1:
+            group_by_filter = ' x => Tuple1({column})'.format(column=group_by_columns[0])
+        elif len(group_by_columns) > 1:
+            group_by_filter = ' x => ({column})'.format(column=', '.join(group_by_columns))
+        else:
+            raise RuntimeError('Unknown group by clause: {0}'.format(node.group_by_clause))
+
+        self._emit('val {rdd_name} = {child_rdd}.groupBy({group_by_filter})'
+                   .format(rdd_name=group_by_rdd, child_rdd=child_rdd, group_by_filter=group_by_filter))
+        
+        aggregate_rdd = self._new_rdd_name()
+        
+        
+        grouped_columns = ['x._1._{0}'.format(column.column_name+1) for column in node.group_by_clause.groupby_exp_list]
+        
+        aggregated_columns = []
+        for column_expr in node.select_list.tmp_exp_list:
+            if isinstance(column_expr, YRawColExp):
+                continue
+            else:
+                aggregated_columns.append(column_expr)
+                
+        for column_expr in aggregated_columns:
+            column_str = _select_list_to_scala(column_expr, node)
+            grouped_columns.append(column_str)
+            
+        all_columns_scala = ', '.join(grouped_columns)
+        self._emit('val {aggregate_rdd} = {group_by_rdd}.map(x => ({all_columns_scala}))'.
+                   format(aggregate_rdd=aggregate_rdd, group_by_rdd=group_by_rdd,
+                          all_columns_scala=all_columns_scala))
+        return aggregate_rdd
+        
     def emit_save_to_file(self, rdd_name):
         self._emit('{rdd}.saveAsTextFile(outputDir + "/{sub_path}")'.format(rdd=rdd_name, sub_path=self._job_name))
+        
+    def emit_order_by(self, node, child_rdd, ascending):
+        rdd = self._new_rdd_name()
+        # FIXME: there is no sort support in Spark
+#         self._emit('val {rdd} = {child_rdd}.orderBy({order}, {partition_count})'
+#                    .format(rdd=rdd, child_rdd=child_rdd, 
+#                     order= 'true' if ascending else 'false', partition_count=1))
+        return child_rdd
 
 def spark_code(node, job_name, spark_home):
     # /home/fathi/workspace/spark/examples/target/scala-2.9.3/spark-examples_2.9.3-0.8.0-SNAPSHOT.jar
@@ -298,7 +362,7 @@ def visit_ystree(node, code_emitter):
     elif isinstance(node, SelectProjectNode):
         raise RuntimeError("Not implemented")
     elif isinstance(node, OrderByNode):
-        return visit_ystree_orderby(node.child, code_emitter)
+        return visit_ystree_orderby(node, code_emitter)
     elif isinstance(node, TwoJoinNode):
         left_rdd = visit_ystree(node.left_child, code_emitter)
         right_rdd = visit_ystree(node.right_child, code_emitter)
@@ -345,5 +409,12 @@ def visit_ystree_groupby(node, code_emitter):
 #     raise RuntimeError('Not implemented yet')
 
 def visit_ystree_orderby(node, code_emitter):
+    child_rdd = visit_ystree(node.child, code_emitter)
+    order_list = node.order_by_clause.order_indicator_list
+    
+    # not all order by clauses are implemented
+    if order_list:
+        ascending = order_list[0] == 'ASC'
+        return code_emitter.emit_order_by(node, child_rdd, ascending)
     raise RuntimeError('Not implemented yet')
 
