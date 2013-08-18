@@ -66,6 +66,21 @@ def _select_list_to_scala(column_expr, node):
     else:
         raise
 
+def _aggregate_to_scala(column_expr, node):
+    assert len(column_expr.parameter_list) == 1
+    param = column_expr.parameter_list[0]
+    param_str = _select_list_to_scala(param, node)
+    
+    if column_expr.func_name == "SUM":
+        return 'x._2.map(x => {0}).sum'.format(param_str)
+    if column_expr.func_name == "AVG":
+        return 'x._2.map(x => {0}).sum / x._2.map(x => {0}).length'.format(param_str)
+    if column_expr.func_name == "COUNT":
+        return 'x._2.map(x => {0}).length'.format(param_str)
+    else:
+        raise
+    return param_str
+
 class SparkCodeEmiter(object):
     _job_name = 'YSmartSparkJob'
     _table_scheme = None
@@ -194,7 +209,15 @@ class SparkCodeEmiter(object):
 
     def emit_group_by(self, node, child_rdd):
         group_by_rdd = self._new_rdd_name()
-        group_by_columns = ['x._{0}'.format(column.column_name+1) for column in node.group_by_clause.groupby_exp_list]
+        
+        group_by_columns = []
+        for column in node.group_by_clause.groupby_exp_list:
+            if isinstance(column, YRawColExp):
+                group_by_columns.append('x._{0}'.format(column.column_name+1))
+            elif isinstance(column, YConsExp):
+                group_by_columns.append(str(column.cons_value))
+            else:
+                raise
         
         if len(group_by_columns) == 1:
             group_by_filter = ' x => Tuple1({column})'.format(column=group_by_columns[0])
@@ -208,22 +231,63 @@ class SparkCodeEmiter(object):
         
         aggregate_rdd = self._new_rdd_name()
         
-        
-        grouped_columns = ['x._1._{0}'.format(column.column_name+1) for column in node.group_by_clause.groupby_exp_list]
+        grouped_columns = []
+        for column in node.group_by_clause.groupby_exp_list:
+            if isinstance(column, YRawColExp):
+                grouped_columns.append('x._{0}'.format(column.column_name+1))
+            elif isinstance(column, YConsExp):
+                grouped_columns.append(str(column.cons_value))
+            else:
+                raise
+            
+        if len(grouped_columns) == 1:
+            grouped_columns_str = grouped_columns[0]
+        elif len(grouped_columns) > 1:
+             grouped_columns_str = ', '.join(grouped_columns)
+        else:
+            raise RuntimeError("Unknown number of grouped columns")
         
         aggregated_columns = []
         for column_expr in node.select_list.tmp_exp_list:
             if isinstance(column_expr, YRawColExp):
-                continue
+                continue # raise # continue but really
             else:
                 aggregated_columns.append(column_expr)
                 
-        for column_expr in aggregated_columns:
-            column_str = _select_list_to_scala(column_expr, node)
-            grouped_columns.append(column_str)
-            
-        all_columns_scala = ', '.join(grouped_columns)
-        self._emit('val {aggregate_rdd} = {group_by_rdd}.map(x => ({all_columns_scala}))'.
+        agg_str = [_aggregate_to_scala(column, node) for column in aggregated_columns]
+        
+        print("DEBUG: AGG COLUMNS {0}".format(agg_str))
+        if len(agg_str) == 1:
+            aggregated_columns_str = agg_str[0]
+        elif len(aggregated_columns) > 1:
+             aggregated_columns_str = ', '.join(agg_str)
+        else:
+            raise RuntimeError("Unknown number of grouped columns")
+
+
+        if len(grouped_columns) + len(aggregated_columns) == 1:
+            if grouped_columns:
+                all_columns_scala = 'Tuple({0})'.format(grouped_columns_str)
+            elif aggregated_columns:
+                all_columns_scala = 'Tuple({0})'.format(aggregated_columns_str)
+            else:
+                raise
+        elif len(grouped_columns) + len(aggregated_columns) > 1:
+            all_columns_scala = '({grouped}, {aggregated})'.format(grouped=grouped_columns_str, aggregated=aggregated_columns_str)
+        else:
+            raise
+#         for column_expr in aggregated_columns:
+#             column_str = _select_list_to_scala(column_expr, node)
+#             grouped_columns.append(column_str)
+# 
+#         if len(grouped_columns) == 1:
+#             all_columns_scala = grouped_columns[0]
+#         elif len(grouped_columns) > 1:
+#             all_columns_scala = ', '.join(grouped_columns)
+#         else:
+#             raise
+
+        self._emit('val {aggregate_rdd} = {group_by_rdd}.map(x => {all_columns_scala})'.
                    format(aggregate_rdd=aggregate_rdd, group_by_rdd=group_by_rdd,
                           all_columns_scala=all_columns_scala))
         return aggregate_rdd
@@ -324,7 +388,7 @@ def _expr_to_scala(node, exp):
         else:
             raise
     elif isinstance(exp, YConsExp):
-        return exp.cons_value
+        return str(exp.cons_value)
     elif isinstance(exp, YFuncExp):
         params = exp.parameter_list
         assert len(params) == 2
