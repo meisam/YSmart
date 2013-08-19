@@ -74,10 +74,14 @@ def _aggregate_to_scala(column_expr, node):
     
     if column_expr.func_name == "SUM":
         return 'x._2.map(x => {0}).sum'.format(param_str)
-    if column_expr.func_name == "AVG":
+    elif column_expr.func_name == "AVG":
         return 'x._2.map(x => {0}).sum / x._2.map(x => {0}).length'.format(param_str)
-    if column_expr.func_name == "COUNT":
+    elif column_expr.func_name == "COUNT":
         return 'x._2.map(x => {0}).length'.format(param_str)
+    elif column_expr.func_name == "COUNT_DISTINCT":
+        return 'x._2.map(x => {0}).toSet().length'.format(param_str)
+    elif column_expr.func_name == "MAX":
+        return 'x._2.map(x => {0}).max'.format(param_str)
     else:
         raise
     return param_str
