@@ -6,7 +6,8 @@ Created on Jul 15, 2013
 from types import NoneType
 from ysmart.backend.code_gen import math_func_dict, agg_func_list
 from ysmart.backend.ystree import SelectProjectNode, GroupByNode, OrderByNode, \
-    TwoJoinNode, TableNode, global_table_dict, YRawColExp, YConsExp, YFuncExp
+    TwoJoinNode, TableNode, global_table_dict, YRawColExp, YConsExp, YFuncExp,\
+    FirstStepWhereCondition, FirstStepOnCondition
 
 
 _job_template = """
@@ -330,7 +331,13 @@ def _scala_join_condition(join_node):
     """
     
     assert join_node.join_condition
-    condition_exp = join_node.join_condition.where_condition_exp
+    
+    if isinstance(join_node.join_condition, FirstStepWhereCondition):
+        condition_exp = join_node.join_condition.where_condition_exp
+    elif isinstance(join_node.join_condition, FirstStepOnCondition):
+        condition_exp = join_node.join_condition.on_condition_exp
+    else:
+        raise
 
     func_name = condition_exp.func_name
     parameter_list = condition_exp.parameter_list
