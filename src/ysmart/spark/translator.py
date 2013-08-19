@@ -176,8 +176,15 @@ class SparkCodeEmiter(object):
         # Project needed columns
         projected_columns = []
         for column in node.select_list.tmp_exp_list:
-            column_index = column.column_name + 1  # + 1 for 1-based tuples in Scala
-            column_expr = r'x._{column_index}'.format(column_index=column_index)
+            if isinstance(column, YRawColExp):
+                column_index = column.column_name + 1  # + 1 for 1-based tuples in Scala
+                column_expr = r'x._{column_index}'.format(column_index=column_index)
+            elif isinstance(column, YConsExp):
+                column_expr = str(column.cons_value)
+            elif isinstance(column, YFuncExp):
+                raise
+            else:
+                raise
             projected_columns.append(column_expr)
         
         if (len(projected_columns) > 1):
