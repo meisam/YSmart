@@ -79,7 +79,7 @@ def _aggregate_to_scala(column_expr, node):
     elif column_expr.func_name == "COUNT":
         return 'x._2.map(x => {0}).length'.format(param_str)
     elif column_expr.func_name == "COUNT_DISTINCT":
-        return 'x._2.map(x => {0}).toSet().length'.format(param_str)
+        return 'x._2.map(x => {0}).distinct.length'.format(param_str)
     elif column_expr.func_name == "MAX":
         return 'x._2.map(x => {0}).max'.format(param_str)
     else:
