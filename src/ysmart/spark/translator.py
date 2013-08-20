@@ -380,14 +380,22 @@ def _scala_join_condition(join_node):
 
 
 def lookup_column_index(column_exp, node):
-    columns_list = node.select_list.tmp_exp_list
-    for (column, index) in zip (columns_list, range(0, len(columns_list))):
-        if isinstance(column, YFuncExp):
-            continue # Meisam means no join condition on aggregated columns
-        elif isinstance(column, YRawColExp):
-            if column.column_name == column_exp.column_name:
-                return index
-    return 10000 # XXX raise RuntimeError('{0} not found in {1}'.format(column_exp, node))
+    
+    if isinstance(node, TwoJoinNode):
+        return column_exp.column_name
+    elif isinstance(node, GroupByNode):
+        return column_exp.column_name
+    elif isinstance(node, TableNode):
+        columns_list = node.select_list.tmp_exp_list
+        for (column, index) in zip (columns_list, range(0, len(columns_list))):
+            if isinstance(column, YFuncExp):
+                continue # Meisam: means no join condition on aggregated columns
+            elif isinstance(column, YRawColExp):
+                if column.column_name == column_exp.column_name:
+                    return index
+    else:
+        raise RuntimeError('Unknow node type is used in join')
+    raise RuntimeError('{0} not found in {1}'.format(column_exp, node))
 
 def _expr_to_scala(node, exp):
     '''
