@@ -441,7 +441,7 @@ def _scala_join_project(join_node):
     if len(all_columns) > 1:
         return 'x => (' + ', '.join(all_columns) + ')'
     elif len(all_columns) == 1:
-        return 'x => ' + all_columns[0]
+        return 'x => Tuple1({column})'.format(column=all_columns[0])
     else:
         raise RuntimeError(repr(join_node))
 
