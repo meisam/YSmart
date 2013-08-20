@@ -6,7 +6,7 @@ Created on Jul 15, 2013
 from types import NoneType
 from ysmart.backend.code_gen import math_func_dict, agg_func_list
 from ysmart.backend.ystree import SelectProjectNode, GroupByNode, OrderByNode, \
-    TwoJoinNode, TableNode, global_table_dict, YRawColExp, YConsExp, YFuncExp,\
+    TwoJoinNode, TableNode, global_table_dict, YRawColExp, YConsExp, YFuncExp, \
     FirstStepWhereCondition, FirstStepOnCondition
 
 
@@ -354,7 +354,6 @@ def _scala_join_condition(join_node):
     parameter_list = condition_exp.parameter_list
     
     if func_name == "EQ":
-        parameter_list[0]
         assert len(parameter_list) == 2
         if parameter_list[0].table_name == "LEFT":
             assert parameter_list[1].table_name == "RIGHT"
@@ -370,6 +369,7 @@ def _scala_join_condition(join_node):
         assert left_param.column_type == right_param.column_type
         column_index = lookup_column_index(left_param, join_node.left_child)
         left_column = 'x._1._{index}'.format(index=column_index + 1)  # Scala starts tuple indexes from 1 and not from 0
+
         column_index = lookup_column_index(right_param, join_node.right_child)
         right_column = 'x._2._{index}'.format(index=column_index + 1)  # Scala starts tuple indexes from 1 and not from 0
 
