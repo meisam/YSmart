@@ -148,7 +148,7 @@ class SparkCodeEmiter(object):
         type_function_map = {"INTEGER":".toInt", "DECIMAL":".toFloat", "TEXT":"", "DATE":""}
         projected_columns = []
         for (column, index) in zip (all_columns, range(0, columns_count)):
-            column_expr = r'line.split("\\|")({column_index})'.format(column_index=index)
+            column_expr = r'columns({column_index})'.format(column_index=index)
             column_expr += type_function_map[column.column_type]
             projected_columns.append(column_expr)
 
@@ -159,7 +159,7 @@ class SparkCodeEmiter(object):
         else:
             raise
 
-        self._emit('val {scan_rdd} = sc.textFile(dbDir + "/{table_name}.tbl").map(line => {line_split})'.format(
+        self._emit(r'val {scan_rdd} = sc.textFile(dbDir + "/{table_name}.tbl").map(line => {{ val columns = line.split("\\|"); {line_split} }})'.format(
                 scan_rdd=scan_rdd, table_name=table_name.lower(), line_split=line_split))
 
         # Select needed rows
@@ -246,7 +246,7 @@ class SparkCodeEmiter(object):
         grouped_columns = []
         for column in node.group_by_clause.groupby_exp_list:
             if isinstance(column, YRawColExp):
-                grouped_columns.append('x._{0}'.format(column.column_name+1))
+                grouped_columns.append('x._1._{0}'.format(column.column_name+1))
             elif isinstance(column, YConsExp):
                 grouped_columns.append(str(column.cons_value))
             else:
