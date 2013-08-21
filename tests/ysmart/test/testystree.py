@@ -4,7 +4,7 @@ Created on Jul 15, 2013
 @author: fathi
 '''
 
-from ysmart.backend import correlation, ystree
+from ysmart.backend import correlation, ystree, config
 from ysmart.frontend.sql2xml import toXml
 from ysmart.spark import translator
 import os.path
@@ -41,9 +41,89 @@ class Test(BaseTestCase):
         self._test_scaffold('tests/ysmart/test/ssb_test/q1_1.sql'
                                   , 'tests/ysmart/test/ssb_test/ssb.schema')
 
+    def test_ssb1_2(self):
+        self._test_scaffold('tests/ysmart/test/ssb_test/q1_2.sql'
+                                  , 'tests/ysmart/test/ssb_test/ssb.schema')
+
+    def test_ssb1_3(self):
+        self._test_scaffold('tests/ysmart/test/ssb_test/q1_3.sql'
+                                  , 'tests/ysmart/test/ssb_test/ssb.schema')
+
+    def test_ssb2_1(self):
+        self._test_scaffold('tests/ysmart/test/ssb_test/q2_1.sql'
+                                  , 'tests/ysmart/test/ssb_test/ssb.schema')
+
+    def test_ssb2_2(self):
+        self._test_scaffold('tests/ysmart/test/ssb_test/q2_2.sql'
+                                  , 'tests/ysmart/test/ssb_test/ssb.schema')
+
+    def test_ssb2_3(self):
+        self._test_scaffold('tests/ysmart/test/ssb_test/q2_3.sql'
+                                  , 'tests/ysmart/test/ssb_test/ssb.schema')
+
+    def test_ssb3_1(self):
+        self._test_scaffold('tests/ysmart/test/ssb_test/q3_1.sql'
+                                  , 'tests/ysmart/test/ssb_test/ssb.schema')
+
+    def test_ssb3_2(self):
+        self._test_scaffold('tests/ysmart/test/ssb_test/q3_2.sql'
+                                  , 'tests/ysmart/test/ssb_test/ssb.schema')
+
+    def test_ssb3_3(self):
+        self._test_scaffold('tests/ysmart/test/ssb_test/q3_3.sql'
+                                  , 'tests/ysmart/test/ssb_test/ssb.schema')
+
+    def test_ssb3_4(self):
+        self._test_scaffold('tests/ysmart/test/ssb_test/q3_4.sql'
+                                  , 'tests/ysmart/test/ssb_test/ssb.schema')
+
+    def test_ssb4_1(self):
+        self._test_scaffold('tests/ysmart/test/ssb_test/q4_1.sql'
+                                  , 'tests/ysmart/test/ssb_test/ssb.schema')
+
+    def test_ssb4_2(self):
+        self._test_scaffold('tests/ysmart/test/ssb_test/q4_2.sql'
+                                  , 'tests/ysmart/test/ssb_test/ssb.schema')
+
+    def test_ssb4_3(self):
+        self._test_scaffold('tests/ysmart/test/ssb_test/q4_3.sql'
+                                  , 'tests/ysmart/test/ssb_test/ssb.schema')
+
+    def test_tpch1query(self):
+        self._test_scaffold('tests/ysmart/test/tpch_test/tpch1query.sql'
+                                  , 'tests/ysmart/test/tpch_test/tpch.schema')
+
+    def test_tpch3query(self):
+        self._test_scaffold('tests/ysmart/test/tpch_test/tpch3query.sql'
+                                  , 'tests/ysmart/test/tpch_test/tpch.schema')
+
+    def test_tpch5query(self):
+        self._test_scaffold('tests/ysmart/test/tpch_test/tpch5query.sql'
+                                  , 'tests/ysmart/test/tpch_test/tpch.schema')
+
+    def test_tpch6query(self):
+        self._test_scaffold('tests/ysmart/test/tpch_test/tpch6query.sql'
+                                  , 'tests/ysmart/test/tpch_test/tpch.schema')
+
+    def test_tpch10query(self):
+        self._test_scaffold('tests/ysmart/test/tpch_test/tpch10query.sql'
+                                  , 'tests/ysmart/test/tpch_test/tpch.schema')
+
+    def test_tpch17query(self):
+        self._test_scaffold('tests/ysmart/test/tpch_test/tpch17query.sql'
+                                  , 'tests/ysmart/test/tpch_test/tpch.schema')
+
+    def test_tpch18query(self):
+        self._test_scaffold('tests/ysmart/test/tpch_test/tpch18query.sql'
+                                  , 'tests/ysmart/test/tpch_test/tpch.schema')
+
+    def test_tpch21query(self):
+        self._test_scaffold('tests/ysmart/test/tpch_test/tpch21query.sql'
+                                , 'tests/ysmart/test/tpch_test/tpch.schema')
+
     def _test_scaffold(self, input_file_path, schema_file_path):
-#         config.turn_on_correlation = True
-#         config.advanced_agg = True
+        config.turn_on_correlation = True
+        config.advanced_agg = True
 
         with open(input_file_path) as quey_file, open(schema_file_path) as schema_file:
             xml_str = toXml(quey_file)
