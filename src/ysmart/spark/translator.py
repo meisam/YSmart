@@ -469,38 +469,6 @@ def visit_ystree(node, code_emitter):
     else:
         raise RuntimeError(node.__class__.__name__)
 
-def visit_ystree_groupby(node, code_emitter):
-    print("-" * 80)
-    print("NODE:{value}".format(value=repr(node)))
-    print("child:{value}".format(value=repr(node.child)))
-    print("composite:{value}".format(value=repr(node.composite)))
-    print("table_list:{value}".format(value=node.table_list))
-    print("where_condition:{value}".format(value=node.where_condition))
-    print("select_list:{value}".format(value=node.select_list))
-    print("group_by_clause:{value}".format(value=node.group_by_clause))
-    print("node.group_by_clause.source:{value}".format(value=node.group_by_clause.source))
-    print("node.group_by_clause.realstructure:{value}".format(value=node.group_by_clause.realstructure))
-    print("node.group_by_clause.groupby_exp_list:{value}".format(value=node.group_by_clause.groupby_exp_list))
-    print(":{value}".format(value=''))
-
-    print("node.group_by_clause: ")
-    for property_name, value in vars(node.group_by_clause).iteritems():
-        print("\t\t{property_name}:{value}".format(property_name=property_name, value=value))
-    
-    print('global table dic = {tables}'.format(tables=global_table_dict))
-
-    print("node.group_by_clause.groupby_exp_list: ")
-    for exp in node.group_by_clause.groupby_exp_list:
-        print("\t{exp}:".format(exp=exp))
-        for property_name, value in vars(exp).iteritems():
-            print("\t\t{property_name}:{value} [{type}]".format(property_name=property_name, value=value, type=type(value).__module__))
-        print('\tcolumn name= {colname}'.format(colname=global_table_dict[exp.table_name].column_list[exp.column_name].column_name))
-
-    print("." * 20)
-    for atr in dir(node):
-        print("\t{key} = {value}".format(key=atr, value='?'))
-#     raise RuntimeError('Not implemented yet')
-
 def visit_ystree_orderby(node, code_emitter):
     child_rdd = visit_ystree(node.child, code_emitter)
     order_list = node.order_by_clause.order_indicator_list
