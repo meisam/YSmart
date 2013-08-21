@@ -200,24 +200,24 @@ class SparkCodeEmiter(object):
         
         return project_rdd
     
-    def emit_join(self, rdd_name_left, rdd_name_right, join_condition_filter, join_project_flat_map):
-        """
-        This method emits Scala code that joins two RDDs. It does the join in 3 steps.
-        1. First it Cartesian products the RDDs.
-        2. Filters the results that should be included in the final result by calling the filter() method
-        3. Eliminates unneeded columns from the result by calling the map() method.
+    def emit_join(self, rdd_name_left, rdd_name_right, left_index, right_index, join_project):
+        left_keyed_rdd = self._new_rdd_name()
         
-        Proper arguments to the filter() and the map() functions should be given as parameters to this method
-        """
-        # FIXME use join columns
-        cartesian_rdd = self._new_rdd_name()
-        
-        self._emit('val {cartesian_rdd} = {left_rdd}.cartesian({right_rdd})'.format(
-                cartesian_rdd=cartesian_rdd, left_rdd=rdd_name_left, right_rdd=rdd_name_right))
+        self._emit('val {left_keyed_rdd} = {left_rdd}.map( x => (x._{left_index}, x))'
+                   .format(left_keyed_rdd=left_keyed_rdd, left_rdd=rdd_name_left, left_index=left_index + 1))
+
+        right_keyed_rdd = self._new_rdd_name()
+        self._emit('val {right_keyed_rdd} = {right_rdd}.map( x => (x._{rightt_index}, x))'
+                   .format(right_keyed_rdd=right_keyed_rdd, right_rdd=rdd_name_right, rightt_index=right_index + 1))
+
         join_rdd = self._new_rdd_name()
-        self._emit('val {join_rdd} = {cartesian_rdd}.filter({condition}).map({join_project_flat_map})'
-                   .format(join_rdd=join_rdd , cartesian_rdd=cartesian_rdd, condition=join_condition_filter, join_project_flat_map=join_project_flat_map))
-        return join_rdd
+        self._emit('val {join_rdd} = {left_keyed_rdd}.join({right_keyed_rdd}).map(x => x._2)'.format(
+                join_rdd=join_rdd, left_keyed_rdd=left_keyed_rdd, right_keyed_rdd=right_keyed_rdd))
+
+        map_rdd = self._new_rdd_name()
+        self._emit('val {map_rdd} = {join_rdd}.map({join_project_flat_map})'
+                   .format(map_rdd=map_rdd , join_rdd=join_rdd, join_project_flat_map=join_project))
+        return map_rdd
 
     def emit_group_by(self, node, child_rdd):
         group_by_rdd = self._new_rdd_name()
@@ -332,14 +332,6 @@ def spark_code(node, job_name, spark_home):
 
 
 def _scala_join_condition(join_node):
-    """
-    returns a string that can be used as a lambda function as a parameter to
-    dd.filter(). Only tuples that pass return true for this lambda expression 
-    should be included in the result of the join.
-    
-    This method assumes that the current join node is the result of the 
-    Cartesian product of its left child and its right child.
-    """
     
     assert join_node.join_condition
     
@@ -367,14 +359,9 @@ def _scala_join_condition(join_node):
             raise
         
         assert left_param.column_type == right_param.column_type
-        column_index = lookup_column_index(left_param, join_node.left_child)
-        left_column = 'x._1._{index}'.format(index=column_index + 1)  # Scala starts tuple indexes from 1 and not from 0
-
-        column_index = lookup_column_index(right_param, join_node.right_child)
-        right_column = 'x._2._{index}'.format(index=column_index + 1)  # Scala starts tuple indexes from 1 and not from 0
-
-        return 'x => {left_column} {operation} {right_column}'.format(
-            left_column=left_column, right_column=right_column, operation='==')
+        left_column_index = lookup_column_index(left_param, join_node.left_child)
+        right_column_index = lookup_column_index(right_param, join_node.right_child)
+        return (left_column_index, right_column_index)
     else:
         raise
 
@@ -459,9 +446,9 @@ def visit_ystree(node, code_emitter):
     elif isinstance(node, TwoJoinNode):
         left_rdd = visit_ystree(node.left_child, code_emitter)
         right_rdd = visit_ystree(node.right_child, code_emitter)
-        join_condition = _scala_join_condition(node)
+        (left_index, right_index) = _scala_join_condition(node)
         join_project = _scala_join_project(node) 
-        return code_emitter.emit_join(left_rdd, right_rdd, join_condition, join_project)
+        return code_emitter.emit_join(left_rdd, right_rdd, left_index, right_index, join_project)
     elif isinstance(node, TableNode):
         return code_emitter.emit_table_read(node)
     elif isinstance(node, NoneType):
