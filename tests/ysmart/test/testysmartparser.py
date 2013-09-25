@@ -125,14 +125,14 @@ class Test(unittest.TestCase):
     def testSSb3_3Parser(self):
         self.sql2XmlTestScaffold("ssb_test/q3_3.sql") 
 
-    def testSSb4_4Parser(self):
-        self.sql2XmlTestScaffold("ssb_test/q3_4.sql") 
-
     def testSSb4_1Parser(self):
         self.sql2XmlTestScaffold("ssb_test/q4_1.sql") 
 
     def testSSb4_2Parser(self):
         self.sql2XmlTestScaffold("ssb_test/q4_2.sql") 
+
+    def testSSb4_4Parser(self):
+        self.sql2XmlTestScaffold("ssb_test/q3_4.sql") 
 
     ############# tests that exposes bugs in YSmart
     @unittest.skip("skipping until the bug in parser is fixed")
