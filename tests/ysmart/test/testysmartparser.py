@@ -125,6 +125,9 @@ class Test(unittest.TestCase):
     def testSSb3_3Parser(self):
         self.sql2XmlTestScaffold("ssb_test/q3_3.sql") 
 
+    def testSSb3_4Parser(self):
+        self.sql2XmlTestScaffold("ssb_test/q3_4.sql") 
+
     def testSSb4_1Parser(self):
         self.sql2XmlTestScaffold("ssb_test/q4_1.sql") 
 
