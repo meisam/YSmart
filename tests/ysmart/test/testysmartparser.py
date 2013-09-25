@@ -47,8 +47,8 @@ class Test(unittest.TestCase):
 
 
     def testYsmartLexer(self):
-        query = "SELECT a FROM b".upper()
-        cStream = antlr3.StringStream(query)
+        query = "SELECT a FROM b"
+        cStream = antlr3.StringStream(query.upper())
         lexer = YSmartLexer(cStream)
         
         token = lexer.next();
@@ -161,9 +161,9 @@ class Test(unittest.TestCase):
                          ==============================================================="""
         path = os.path.join(base_tests_path, relative_path)
 
-        producedXml = toXml(open(path)).upper()
+        producedXml = toXml(open(path))
         
-        expectedXml = open(path + ".xml").read().upper()
+        expectedXml = open(path + ".xml").read()
         diff = difflib.ndiff(expectedXml.splitlines(1), producedXml.splitlines(1))
         self.assertEqual(expectedXml, producedXml, errorMsg % (path, expectedXml, producedXml, ''.join(diff)))
 
