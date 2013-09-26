@@ -1,20 +1,20 @@
-<QUERY>
-<NODE TOKENTYPE="8" TOKENNAME="T_SELECT" LINE="1" POSITIONINLINE="0" CHILDCOUNT="3">
-<CONTENT>T_SELECT</CONTENT>
-<NODE TOKENTYPE="4" TOKENNAME="T_RESERVED" LINE="1" POSITIONINLINE="0" CHILDCOUNT="0">
-<CONTENT>SELECT</CONTENT>
-</NODE><NODE TOKENTYPE="9" TOKENNAME="T_COLUMN_LIST" LINE="2" POSITIONINLINE="1" CHILDCOUNT="1">
-<CONTENT>T_COLUMN_LIST</CONTENT>
-<NODE TOKENTYPE="10" TOKENNAME="T_SELECT_COLUMN" LINE="2" POSITIONINLINE="1" CHILDCOUNT="1">
-<CONTENT>T_SELECT_COLUMN</CONTENT>
-<NODE TOKENTYPE="61" TOKENNAME="ID" LINE="2" POSITIONINLINE="1" CHILDCOUNT="0">
-<CONTENT>"SIZE"</CONTENT>
-</NODE></NODE></NODE><NODE TOKENTYPE="11" TOKENNAME="T_FROM" LINE="3" POSITIONINLINE="0" CHILDCOUNT="2">
-<CONTENT>T_FROM</CONTENT>
-<NODE TOKENTYPE="4" TOKENNAME="T_RESERVED" LINE="3" POSITIONINLINE="0" CHILDCOUNT="0">
-<CONTENT>FROM</CONTENT>
-</NODE><NODE TOKENTYPE="61" TOKENNAME="ID" LINE="4" POSITIONINLINE="1" CHILDCOUNT="0">
-<CONTENT>UNITS</CONTENT>
-</NODE></NODE></NODE><NODE TOKENTYPE="42" TOKENNAME="SEMI" LINE="4" POSITIONINLINE="6" CHILDCOUNT="0">
-<CONTENT>;</CONTENT>
-</NODE></QUERY>
+<query>
+<node tokentype="8" tokenname="T_SELECT" line="1" positioninline="0" childcount="3">
+<content>T_SELECT</content>
+<node tokentype="4" tokenname="T_RESERVED" line="1" positioninline="0" childcount="0">
+<content>SELECT</content>
+</node><node tokentype="9" tokenname="T_COLUMN_LIST" line="2" positioninline="1" childcount="1">
+<content>T_COLUMN_LIST</content>
+<node tokentype="10" tokenname="T_SELECT_COLUMN" line="2" positioninline="1" childcount="1">
+<content>T_SELECT_COLUMN</content>
+<node tokentype="61" tokenname="ID" line="2" positioninline="1" childcount="0">
+<content>SIZE</content>
+</node></node></node><node tokentype="11" tokenname="T_FROM" line="3" positioninline="0" childcount="2">
+<content>T_FROM</content>
+<node tokentype="4" tokenname="T_RESERVED" line="3" positioninline="0" childcount="0">
+<content>FROM</content>
+</node><node tokentype="61" tokenname="ID" line="4" positioninline="1" childcount="0">
+<content>UNITS</content>
+</node></node></node><node tokentype="42" tokenname="SEMI" line="4" positioninline="6" childcount="0">
+<content>;</content>
+</node></query>
