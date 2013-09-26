@@ -95,6 +95,13 @@ def token2str(token, query):
         stop = start + len(token.text) # Meisam token.stopIndex does not work
         result = lines[token.line - 1][start:stop]
         return result
+    elif token.getType() in [ID]:
+        # if an keyword is used as ID (columns/table name), it should be quoted
+        sql_id = str(token)
+        if sql_id[0] in ["'", '"']:
+            assert sql_id[-1] == sql_id[0]
+            return sql_id[1:-1]
+    
     return str(token)
     
 #TODO Meisam: This should be escaped to XML characters
