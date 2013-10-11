@@ -14,16 +14,17 @@ _job_template = """
 object {job_name} {{
   def main(args: Array[String]) {{
 
-    if (args.length != 3) {{
-        Console.print("USAGE: {job_name} <spark_cluster address> <db home dir> <output dir>")
+    if (args.length != 5) {{
+        Console.print("USAGE: Q1_1 <SPARK master URL> <SPARK_HOME> <SPARK application jar> <db home dir> <output dir>")
         throw new RuntimeException("Not enough number of parameters")
     }}
     val master =  args(0)
-    val dbDir =  args(1)
-    val outputDir = args(2)
+    val sparkHome =  args(1)
+    val jarFile = args(2)
+    val dbDir =  args(3)
+    val outputDir = args(4)
     
-    val sc = new SparkContext(master, "{job_name}",
-      "{spark_home}", Seq(), Map())
+    val sc = new SparkContext(master, "{job_name}", sparkHome, Seq(jarFile), Map())
 """
 
 def _condition_to_scala(expr, node):
@@ -89,15 +90,13 @@ def _aggregate_to_scala(column_expr, node):
 class SparkCodeEmiter(object):
     _job_name = 'YSmartSparkJob'
     _table_scheme = None
-    _spark_home = ''
     _rdd_cntr = 0
     _code = ''
     _indent_dept = 0
     _indent_width = 2
 
-    def __init__(self, table_schema, spark_home, job_name='YSmartSparkJob'):
+    def __init__(self, table_schema, job_name='YSmartSparkJob'):
         self._table_scheme = table_schema
-        self._spark_home = spark_home
         self._job_name = job_name
 
     def get_code(self):
@@ -121,7 +120,7 @@ class SparkCodeEmiter(object):
         self._emit('import SparkContext._')
 
     def _emit_object_def(self):
-        self._emit(_job_template.format(job_name=self._job_name, spark_home=self._spark_home))
+        self._emit(_job_template.format(job_name=self._job_name))
 
     def emit_header(self):
         self._emit_package_name()
@@ -225,7 +224,7 @@ class SparkCodeEmiter(object):
         group_by_columns = []
         for column in node.group_by_clause.groupby_exp_list:
             if isinstance(column, YRawColExp):
-                group_by_columns.append('x._{0}'.format(column.column_name+1))
+                group_by_columns.append('x._{0}'.format(column.column_name + 1))
             elif isinstance(column, YConsExp):
                 group_by_columns.append(str(column.cons_value))
             else:
@@ -246,7 +245,7 @@ class SparkCodeEmiter(object):
         grouped_columns = []
         for column in node.group_by_clause.groupby_exp_list:
             if isinstance(column, YRawColExp):
-                grouped_columns.append('x._1._{0}'.format(column.column_name+1))
+                grouped_columns.append('x._1._{0}'.format(column.column_name + 1))
             elif isinstance(column, YConsExp):
                 grouped_columns.append(str(column.cons_value))
             else:
@@ -262,7 +261,7 @@ class SparkCodeEmiter(object):
         aggregated_columns = []
         for column_expr in node.select_list.tmp_exp_list:
             if isinstance(column_expr, YRawColExp):
-                continue # raise # continue but really
+                continue  # raise # continue but really
             else:
                 aggregated_columns.append(column_expr)
                 
@@ -315,12 +314,10 @@ class SparkCodeEmiter(object):
 #                     order= 'true' if ascending else 'false', partition_count=1))
         return child_rdd
 
-def spark_code(node, job_name, spark_home):
-    # /home/fathi/workspace/spark/examples/target/scala-2.9.3/spark-examples_2.9.3-0.8.0-SNAPSHOT.jar
-    
+def spark_code(node, job_name):
     global global_table_dict
     
-    code_emitter = SparkCodeEmiter(global_table_dict, spark_home, job_name)
+    code_emitter = SparkCodeEmiter(global_table_dict, job_name)
     code_emitter.emit_header();
     rdd_name = visit_ystree(node, code_emitter)
     code_emitter.emit_save_to_file(rdd_name)
@@ -376,7 +373,7 @@ def lookup_column_index(column_exp, node):
         columns_list = node.select_list.tmp_exp_list
         for (column, index) in zip (columns_list, range(0, len(columns_list))):
             if isinstance(column, YFuncExp):
-                continue # Meisam: means no join condition on aggregated columns
+                continue  # Meisam: means no join condition on aggregated columns
             elif isinstance(column, YRawColExp):
                 if column.column_name == column_exp.column_name:
                     return index
