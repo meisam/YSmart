@@ -159,7 +159,7 @@ class SparkCodeEmiter(object):
         else:
             raise
 
-        self._emit(r'val {scan_rdd} = sc.textFile(dbDir + "/{table_name}.tbl").map(line => {{ val columns = line.split("\\|"); {line_split} }})'.format(
+        self._emit(r'val {scan_rdd} = sc.textFile(dbDir + "/{table_name}*").map(line => {{ val columns = line.split("\\|"); {line_split} }})'.format(
                 scan_rdd=scan_rdd, table_name=table_name.lower(), line_split=line_split))
 
         # Select needed rows
