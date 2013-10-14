@@ -113,7 +113,8 @@ class SparkCodeEmiter(object):
         
 
     def _emit_package_name(self):
-        self._emit('package spark.examples')
+        # self._emit('package spark.examples')
+        pass
 
     def _emit_package_imports(self):
         self._emit('import spark._')
