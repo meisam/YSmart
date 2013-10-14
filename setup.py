@@ -30,13 +30,14 @@ setup(
     author_email='liru@cse.ohio-state.edu',
     description=('YSmart is a correlation aware SQL-to-MapReduce translator'),
     license='http://www.apache.org/licenses/LICENSE-2.0',
-    packages=['ysmart', 'ysmart.frontend', 'ysmart.backend', 'ysmart.test'],
+    packages=['ysmart', 'ysmart.frontend', 'ysmart.backend', 'ysmart.spark', 'ysmart.test'],
     package_dir={'ysmart':'src/ysmart',
                   'ysmart.frontend': 'src/ysmart/frontend',
                   'ysmart.backend': 'src/ysmart/backend',
+                  'ysmart.spark': 'src/ysmart/spark',
                   'ysmart.test': 'tests/ysmart/test'
                 },
-    data_files=[('ysmart.test', 
+    data_files=[('ysmart-test', 
                  [
                     'tests/ysmart/test/ssb_test/q1_3.sql.xml',
                     'tests/ysmart/test/ssb_test/q2_2004.java',
@@ -185,5 +186,5 @@ setup(
                     'tests/ysmart/test/tpch_test/tpch18query001.java',
                   ]
                  )],
-    scripts=['scripts/sql2mapred.py'],
+    scripts=['scripts/sql2mapred.py', 'scripts/sql2spark.py'],
 )
