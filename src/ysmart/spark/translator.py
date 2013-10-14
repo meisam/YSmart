@@ -268,7 +268,6 @@ class SparkCodeEmiter(object):
                 
         agg_str = [_aggregate_to_scala(column, node) for column in aggregated_columns]
         
-        print("DEBUG: AGG COLUMNS {0}".format(agg_str))
         if len(agg_str) == 1:
             aggregated_columns_str = agg_str[0]
         elif len(aggregated_columns) > 1:
@@ -324,8 +323,6 @@ def spark_code(node, job_name):
     code_emitter.emit_save_to_file(rdd_name)
     code_emitter.emit_footer()
     code = code_emitter.get_code()
-    print ('rdd name = {0}'.format(rdd_name))
-    print ('code= ================= =\n{0}'.format(code))
     return code
 
 
