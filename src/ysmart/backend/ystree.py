@@ -268,9 +268,7 @@ class YExpTool:
             last_token = input_token_list[-1]
 
             if second_token["name"] != "LPAREN" or last_token["name"] != "RPAREN":
-                print input_token_list
-                print 1 / 0
-
+                raise RuntimeError("Expecting parentheses in {0}".format(input_token_list))
 
             sub_level = 0
 
@@ -319,13 +317,10 @@ class YExpTool:
                 return self.convert_token_list_to_exp_tree(input_token_list[1:-1])
 
             else:
-                print input_token_list, last_token
-                print 1 / 0
+                raise RuntimeError("Syntax error: {0}, {1}".format(input_token_list, last_token))
 
         else:
-            print input_token_list, first_token
-            print 1 / 0
-
+           raise RuntimeError("Syntax error: {0}, {1}".format(input_token_list, first_token))
 
 class YExpBase:
 
@@ -639,8 +634,7 @@ class OrderByNode(QueryPlanTreeBase):
         super(OrderByNode, self).__init__()
 
     def release_order_by(self):
-        print "WRONG"
-        print 1 / 0
+        raise RuntimeError("Syntax error: {0}".format(self))
 
     def release_group_by(self):
         self.child = self.child.release_group_by()
@@ -696,12 +690,10 @@ class GroupByNode(QueryPlanTreeBase):
         super(GroupByNode, self).__init__()
 
     def release_order_by(self):
-        print "WRONG"
-        print 1 / 0
+        raise RuntimeError("Syntax error: {0}".format(self))
 
     def release_group_by(self):
-        print "WRONG"
-        print 1 / 0
+        raise RuntimeError("Syntax error: {0}".format(self))
 
     def convert_to_binary_join_tree(self):
         self.child = self.child.convert_to_binary_join_tree()
@@ -925,16 +917,13 @@ class TwoJoinNode(QueryPlanTreeBase):
 
 
     def release_order_by(self):
-        print "WRONG"
-        print 1 / 0
+        raise RuntimeError("Syntax error: {0}".format(self))
 
     def release_group_by(self):
-        print "WRONG"
-        print 1 / 0
+        raise RuntimeError("Syntax error: {0}".format(self))
 
     def convert_to_binary_join_tree(self):
-        print "WRONG"
-        print 1 / 0
+        raise RuntimeError("Syntax error: {0}".format(self))
 
 # the get_pk function should be called after generating the index
     def get_pk(self):
@@ -1137,7 +1126,7 @@ class MultipleJoinNode(QueryPlanTreeBase):
                         if x not in a_join_node.table_alias_dict.keys():
                             a_join_node.table_alias_dict[x] = a_child.table_alias_dict[x]
                         else:
-                            print 1 / 0
+                            raise RuntimeError("{0} already exists in the list of alias tables for {1}".format(x, a_join_node))
 
 
                     for x in a_child.table_list:
@@ -1392,7 +1381,7 @@ class LRBSelectNode:
                     if x not in final_node.table_alias_dict.keys():
                         final_node.table_alias_dict[x] = result_item.table_alias_dict[x]
                     else:
-                        print 1 / 0
+                        raise RuntimeError("{0} already exists in the list of alias tables for {1}".format(x, final_node))
 
                 for x in result_item.table_list:
                     if x not in final_node.table_list:
@@ -1956,8 +1945,7 @@ class FirstStepWhereCondition:
             c = c[0]
 
             if c.tokenname != 'T_COND_OR' and c.tokenname != 'T_COND_AND':
-
-                print 1 / 0
+                raise RuntimeError("Expecting AND or OR but found {0}".format(c))
 
             func_name = None
             if c.tokenname == 'T_COND_OR':
@@ -2544,8 +2532,7 @@ def process_schema_in_a_file(schema_str):
 
 
             if a_column_type not in ["INTEGER", "DECIMAL", "TEXT", "DATE"]:
-                print "wrong a_column_name:", al
-                print 1 / 0
+                raise RuntimeError("wrong a_column_name: {0}".format(al))
 
             a_col = ColumnSchema(a_column_name, a_column_type)
 
@@ -2870,7 +2857,7 @@ def __schema_having__(having_exp, groupby_list, table_list, table_alias_dict):
     res = 0
 
     if isinstance(having_exp, YFuncExp) is False:
-        print 1 / 0
+        raise RuntimeError("Expecting a function expression but found {0}".format(having_exp))
 
     res = __check_func_para__(having_exp, table_list, table_alias_dict)
     if res == -1:
@@ -2923,8 +2910,7 @@ def __schema_where__(where, table_list, table_alias_dict):
                     break
 
         if tmp_name is None:
-            print "Grammar Error. Shouldn't be here"
-            print 1 / 0
+            raise RuntimeError("Grammar Error. Shouldn't be here")
 
         column_type = global_table_dict[tmp_name].get_column_type_by_name(exp.column_name)
 
@@ -3141,7 +3127,7 @@ def __gen_join_key__(exp, key_bool):
 
         for x in exp.parameter_list:
             if not isinstance(x, YFuncExp):
-                print 1 / 0
+                raise RuntimeError("Expecting a function expression but found {0}".format(x))
 
             tmp_exp = __gen_join_key__(x, True)
 
@@ -3203,7 +3189,7 @@ def __boolean_exp_filter__(exp, table_list, table_alias_dict, remove_bool):
                         exp_list.append(tmp_exp)
 
                 else:
-                    print 1 / 0
+                    raise RuntimeError("Expecting a function expression but found {0}".format(tmp))
 
             if tmp_bool == False:
                 return None
@@ -3263,8 +3249,7 @@ def __boolean_exp_filter__(exp, table_list, table_alias_dict, remove_bool):
                 return None
 
     else:
-        print "Bool_exp_filter: shouldn't be here"
-        print 1 / 0
+        raise RuntimeError("Bool_exp_filter: shouldn't be here")
 
 # ## filter the groupby where expression. return the exp that can be pushed down to the child.
 # ## also remove it from the original exp
@@ -3273,7 +3258,7 @@ def __groupby_where_filter__(exp):
     func_list = ["AND", "OR"]
 
     if not isinstance(exp, YFuncExp):
-        print 1 / 0
+       raise RuntimeError("Expecting a function expression but found {0}".format(exp))
 
     if exp.func_name in func_list:
         exp_list = []
@@ -3398,9 +3383,7 @@ def predicate_pushdown(tree):
                                 break
 
                     if tmp_bool is False:
-                        print "project predicate pushdown:This shouldn't happen", tmp.column_name, tree.table_list, tree.table_alias_dict, select_dict.values()
-                        print 1 / 0
-
+                        raise RuntimeError("project predicate pushdown:This shouldn't happen! {0}, {1}, {2}, {3}".format(tmp.column_name, tree.table_list, tree.table_alias_dict, select_dict.values()))
 
                 child_exp = __boolean_exp_filter__(exp, tree.in_table_list, tree.in_table_alias_dict, True)
 
@@ -3479,8 +3462,7 @@ def __gen_column_index__(exp, table_list, table_alias_dict):
         if exp.table_name != "":
             if exp.table_name not in table_alias_dict.keys():
                 if exp.table_name not in table_list:
-                    print "Grammar Error", exp.table_name, exp.column_name, table_list, table_alias_dict
-                    print 1 / 0
+                    raise RuntimeError("Grammar Error: {0}, {1}, {2}, {3}".format(exp.table_name, exp.column_name, table_list, table_alias_dict))
                 tmp_table = lookup_a_table(exp.table_name)
 
                 if tmp_table is None:
@@ -3526,7 +3508,7 @@ def __gen_column_index__(exp, table_list, table_alias_dict):
 def __gen_func_index__(exp, table_list, table_alias_dict):
 
     if isinstance(exp, YFuncExp) is not True:
-        print 1 / 0
+        raise RuntimeError("Expecting a function expression but found {0}".format(exp))
 
     if exp is None:
         return None
@@ -3542,8 +3524,7 @@ def __gen_func_index__(exp, table_list, table_alias_dict):
                 if para.table_name in table_list:
                     new_para = __gen_column_index__(para, table_list, table_alias_dict)
                     if new_para is None:
-                        print "COlumn Index error.", para.column_name, table_list, table_alias_dict, exp.func_name
-                        print 1 / 0
+                        raise RuntimeError("Column Index error: {0}, {1}, {2}, {3}.".format(para.column_name, table_list, table_alias_dict, exp.func_name))
 
                     new_para_list.append(new_para)
                 else:
@@ -3552,7 +3533,7 @@ def __gen_func_index__(exp, table_list, table_alias_dict):
             elif isinstance(para, YFuncExp):
                 tmp_exp = __gen_func_index__(para, table_list, table_alias_dict)
                 if tmp_exp is None:
-                    print 1 / 0
+                    raise RuntimeError("Unknown function for {0}".format(para))
 
                 new_para_list.append(tmp_exp)
 
@@ -3578,8 +3559,8 @@ def __gen_select_index__(select_list, table_list, table_alias_dict):
 
             new_exp = __gen_column_index__(exp, table_list, table_alias_dict)
             if new_exp is None:
-                print "Column index error", exp.table_name, exp.column_name
-                print 1 / 0
+                raise RuntimeError("Column index error: {0}, {1}.".format(exp.table_name, exp.column_name))
+
             new_select_dict[new_exp] = select_list.dict_exp_and_alias[exp]
             new_exp_list.append(new_exp)
 
@@ -3605,7 +3586,7 @@ def __gen_where_index__(where, table_list, table_alias_dict):
 
 def __get_gb_list__(exp, col_list):
     if isinstance(exp, YFuncExp) is False:
-        print 1 / 0
+        raise RuntimeError("Expecting a function expression but found {0}".format(exp))
 
     if exp.func_name in ["AND", "OR"]:
         for x in exp.parameter_list:
@@ -3632,7 +3613,7 @@ def gen_column_index(tree):
 
     elif isinstance(tree, GroupByNode):
         if tree.select_list is None or tree.child.select_list is None:
-            print 1 / 0
+            raise RuntimeError("Selection list for {0} is non".format(tree))
 
         select_dict = tree.child.select_list.dict_exp_and_alias
         exp_list = tree.child.select_list.tmp_exp_list
@@ -4012,8 +3993,7 @@ def __gen_project_list__(select_list, table_list, table_alias_dict, project_list
                 a_col = ColumnSchema(exp_dict[exp], "DECIMAL")
                 project_list.append(a_col)
         else:
-            print "currently doesn't support constant in sub query"
-            print 1 / 0
+            raise RuntimeError("Currently doesn't support constant in sub queries")
 
 
 def gen_project_list(tree):
@@ -4252,7 +4232,7 @@ def column_filtering(tree):
                     new_select_dict[new_exp] = None
 
         else:
-            print 1 / 0
+            raise RuntimeError("Group by clause is None for {0}".format(tree))
 
 
         if tree.where_condition is not None:
@@ -4342,7 +4322,7 @@ def column_filtering(tree):
             new_dict = {}
             table_schema = lookup_a_table(tree.left_child.table_alias)
             if table_schema is None:
-                print 1 / 0
+                raise RuntimeError("Table schema is None.".format(exp))
             for x in table_schema.column_list:
                 tmp_bool = False
                 for tmp in left_exp_list:
@@ -4367,7 +4347,8 @@ def column_filtering(tree):
             new_dict = {}
             table_schema = lookup_a_table(tree.right_child.table_alias)
             if table_schema is None:
-                print 1 / 0
+                raise RuntimeError("Table schema is None.")
+            
             for x in table_schema.column_list:
                 tmp_bool = False
                 for tmp in right_exp_list:
@@ -4393,7 +4374,7 @@ def column_filtering(tree):
         new_exp_list = []
 
         if tree.select_list is None or tree.child.select_list is None:
-            print 1 / 0
+            raise RuntimeError("Selection list is None for {0}".format(tree))
 ########shouldn't change the select_list of the sp. it may be used when generating index
 
         child_exp_list = tree.child.select_list.tmp_exp_list
@@ -4451,7 +4432,7 @@ def __gen_col_table_name__(exp, table_list, table_alias_dict):
             table_schema = lookup_a_table(table_alias_dict[exp.table_name])
 
         if table_schema is None:
-            print 1 / 0
+            raise RuntimeError("Table schema is None.")
 
         exp.column_type = table_schema.get_column_type_by_name(exp.column_name)
         return

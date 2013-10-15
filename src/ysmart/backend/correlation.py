@@ -560,8 +560,7 @@ def job_flow_correlation(tree):
                     tree = tree.left_composite
 
             else:
-                print 1 / 0
-
+                raise RuntimeError("Left composite {0} or right composite {1} is None for {2}.".fromat(left_composite, right_composite, tree))
 
         elif left_jfc == True:
             if tree.left_composite is None:
@@ -659,8 +658,7 @@ def job_flow_correlation(tree):
                     tree.child_list.remove(x)
 
             if len(tree.child_list) > 0 and tree.dep > 1:
-                print "dependency! need to roll back"
-                print 1 / 0
+                raise RuntimeError("dependency! need to roll back")
 
         else:
             tree.dep = tree.dep + 1
@@ -741,7 +739,7 @@ def adjust_composite_index(tree):
                         if node.table_alias_dict[tn_alias] == tn:
                             break
                     if tn_alias is None:
-                        print 1 / 0
+                        raise RuntimeError("Table name alias is None for {0} in {1}".format(tn, node))
                     node.adjust_index(exp_list, tn_alias)
 
         for child in tree.child_list:

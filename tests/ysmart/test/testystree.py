@@ -21,104 +21,104 @@ class Test(BaseTestCase):
 
     def test_select_nation(self):
         self._test_scaffold('tests/ysmart/test/unit_tests/tpch_select_nation.sql'
-                                  , 'tests/ysmart/test/tpch_test/tpch.schema', 'tests/ysmart/test/unit_tests')
+                                  , 'tests/ysmart/test/tpch_test/tpch.schema', 'output')
 
     def test_join(self):
         self._test_scaffold('tests/ysmart/test/unit_tests/tpch_join.sql'
                                   , 'tests/ysmart/test/tpch_test/tpch.schema'
-                               , 'tests/ysmart/test/tpch_test')
+                               , 'output')
 
     def test_ssb1_1(self):
         self._test_scaffold('tests/ysmart/test/ssb_test/q1_1.sql'
-                                  , 'tests/ysmart/test/ssb_test/ssb.schema', 'tests/ysmart/test/ssb_test')
+                                  , 'tests/ysmart/test/ssb_test/ssb.schema', 'output')
 
     def test_ssb1_2(self):
         self._test_scaffold('tests/ysmart/test/ssb_test/q1_2.sql'
-                                  , 'tests/ysmart/test/ssb_test/ssb.schema', 'tests/ysmart/test/ssb_test')
+                                  , 'tests/ysmart/test/ssb_test/ssb.schema', 'output')
 
     def test_ssb1_3(self):
         self._test_scaffold('tests/ysmart/test/ssb_test/q1_3.sql'
-                                  , 'tests/ysmart/test/ssb_test/ssb.schema', 'tests/ysmart/test/ssb_test')
+                                  , 'tests/ysmart/test/ssb_test/ssb.schema', 'output')
 
     def test_ssb2_1(self):
         self._test_scaffold('tests/ysmart/test/ssb_test/q2_1.sql'
-                                  , 'tests/ysmart/test/ssb_test/ssb.schema', 'tests/ysmart/test/ssb_test')
+                                  , 'tests/ysmart/test/ssb_test/ssb.schema', 'output')
 
     def test_ssb2_2(self):
         self._test_scaffold('tests/ysmart/test/ssb_test/q2_2.sql'
-                                  , 'tests/ysmart/test/ssb_test/ssb.schema', 'tests/ysmart/test/ssb_test')
+                                  , 'tests/ysmart/test/ssb_test/ssb.schema', 'output')
 
     def test_ssb2_3(self):
         self._test_scaffold('tests/ysmart/test/ssb_test/q2_3.sql'
-                                  , 'tests/ysmart/test/ssb_test/ssb.schema', 'tests/ysmart/test/ssb_test')
+                                  , 'tests/ysmart/test/ssb_test/ssb.schema', 'output')
 
     def test_ssb3_1(self):
         self._test_scaffold('tests/ysmart/test/ssb_test/q3_1.sql'
-                                  , 'tests/ysmart/test/ssb_test/ssb.schema', 'tests/ysmart/test/ssb_test')
+                                  , 'tests/ysmart/test/ssb_test/ssb.schema', 'output')
 
     def test_ssb3_2(self):
         self._test_scaffold('tests/ysmart/test/ssb_test/q3_2.sql'
-                                  , 'tests/ysmart/test/ssb_test/ssb.schema', 'tests/ysmart/test/ssb_test')
+                                  , 'tests/ysmart/test/ssb_test/ssb.schema', 'output')
 
     def test_ssb3_3(self):
         self._test_scaffold('tests/ysmart/test/ssb_test/q3_3.sql'
-                                  , 'tests/ysmart/test/ssb_test/ssb.schema', 'tests/ysmart/test/ssb_test')
+                                  , 'tests/ysmart/test/ssb_test/ssb.schema', 'output')
 
     def test_ssb3_4(self):
         self._test_scaffold('tests/ysmart/test/ssb_test/q3_4.sql'
-                                  , 'tests/ysmart/test/ssb_test/ssb.schema', 'tests/ysmart/test/ssb_test')
+                                  , 'tests/ysmart/test/ssb_test/ssb.schema', 'output')
 
     def test_ssb4_1(self):
         self._test_scaffold('tests/ysmart/test/ssb_test/q4_1.sql'
-                                  , 'tests/ysmart/test/ssb_test/ssb.schema', 'tests/ysmart/test/ssb_test')
+                                  , 'tests/ysmart/test/ssb_test/ssb.schema', 'output')
 
     def test_ssb4_2(self):
         self._test_scaffold('tests/ysmart/test/ssb_test/q4_2.sql'
-                                  , 'tests/ysmart/test/ssb_test/ssb.schema', 'tests/ysmart/test/ssb_test')
+                                  , 'tests/ysmart/test/ssb_test/ssb.schema', 'output')
 
     def test_ssb4_3(self):
         self._test_scaffold('tests/ysmart/test/ssb_test/q4_3.sql'
-                                  , 'tests/ysmart/test/ssb_test/ssb.schema', 'tests/ysmart/test/ssb_test')
+                                  , 'tests/ysmart/test/ssb_test/ssb.schema', 'output')
 
     def test_tpch1query(self):
         self._test_scaffold('tests/ysmart/test/tpch_test/tpch1query.sql'
                                   , 'tests/ysmart/test/tpch_test/tpch.schema'
-                               , 'tests/ysmart/test/tpch_test')
+                               , 'output')
 
     def test_tpch3query(self):
         self._test_scaffold('tests/ysmart/test/tpch_test/tpch3query.sql'
                                   , 'tests/ysmart/test/tpch_test/tpch.schema'
-                               , 'tests/ysmart/test/tpch_test')
+                               , 'output')
 
     def test_tpch5query(self):
         self._test_scaffold('tests/ysmart/test/tpch_test/tpch5query.sql'
                                   , 'tests/ysmart/test/tpch_test/tpch.schema'
-                               , 'tests/ysmart/test/tpch_test')
+                               , 'output')
 
     def test_tpch6query(self):
         self._test_scaffold('tests/ysmart/test/tpch_test/tpch6query.sql'
                                   , 'tests/ysmart/test/tpch_test/tpch.schema'
-                               , 'tests/ysmart/test/tpch_test')
+                               , 'output')
 
     def test_tpch10query(self):
         self._test_scaffold('tests/ysmart/test/tpch_test/tpch10query.sql'
                                   , 'tests/ysmart/test/tpch_test/tpch.schema'
-                               , 'tests/ysmart/test/tpch_test')
+                               , 'output')
 
     def test_tpch17query(self):
         self._test_scaffold('tests/ysmart/test/tpch_test/tpch17query.sql'
                                   , 'tests/ysmart/test/tpch_test/tpch.schema'
-                               , 'tests/ysmart/test/tpch_test')
+                               , 'output')
 
     def test_tpch18query(self):
         self._test_scaffold('tests/ysmart/test/tpch_test/tpch18query.sql'
                                   , 'tests/ysmart/test/tpch_test/tpch.schema'
-                               , 'tests/ysmart/test/tpch_test')
+                               , 'output')
 
     def test_tpch21query(self):
         self._test_scaffold('tests/ysmart/test/tpch_test/tpch21query.sql'
                                 , 'tests/ysmart/test/tpch_test/tpch.schema'
-                               , 'tests/ysmart/test/tpch_test')
+                               , 'output')
 
     def _test_scaffold(self, input_file_path, schema_file_path, dest_dir):
         config.turn_on_correlation = True

@@ -92,8 +92,7 @@ def __select_func_convert_to_java__(exp, buf_dict):
     elif exp.func_name in agg_func_list:
 
         if len(exp.parameter_list) != 1:
-            print "This should be Grammar error. "
-            print 1 / 0
+            raise RuntimeError("This should be Grammar error.")
 
         para = exp.parameter_list[0]
 
@@ -111,8 +110,7 @@ def __select_func_convert_to_java__(exp, buf_dict):
 
 
     else:
-        print "user defined functioin not supported yet", exp.func_name
-        print 1 / 0
+        raise RuntimeError("User defined function {0} not supported yet".format(exp.func_name))
 
     return return_str
 
@@ -121,7 +119,7 @@ def __select_func_convert_to_java__(exp, buf_dict):
 def __gb_exp_to_java__(exp, gb_exp_list, buf_dict, hash_key):
     return_str = ""
     if not isinstance(exp, ystree.YFuncExp):
-        print 1 / 0
+        raise RuntimeError("{0} is not a function expression".format(exp))
 
     if exp.func_name in agg_func_list:
         for x in gb_exp_list:
@@ -172,7 +170,7 @@ def __gb_exp_to_java__(exp, gb_exp_list, buf_dict, hash_key):
             return_str += ")"
 
     else:
-        print 1 / 0
+        raise RuntimeError("Unknown function expression: {0}".fromat(exp))
 
     return return_str
 
@@ -194,7 +192,7 @@ def __para_to_java__(para_type, value, buf_name):
             return_str = buf_name + "[" + str(value) + "]"
 
         else:
-            print 1 / 0
+            raise RuntimeError("Unknown type: {0}:".format(para_type))
 
     else:
         if para_type == "INTEGER":
@@ -210,7 +208,7 @@ def __para_to_java__(para_type, value, buf_name):
             return_str = str(value)
 
         else:
-            print 1 / 0
+            raise RuntimeError("Unknown type: {0}:".format(para_type))
 
 
     return return_str
@@ -234,10 +232,10 @@ def __operator_to_java__(op_type, op_name, op_list):
             res_str = op_list[0] + math_func_dict[op_name] + op_list[1]
 
         elif op_type == "TEXT":
-            print 1 / 0
+            raise RuntimeError("INTEGER or DECIMAL type is expected but TEXT is found for: {0}:".format(op_name))
 
         elif op_type == "DATE":
-            print 1 / 0
+            raise RuntimeError("INTEGER or DECIMAL type is expected but DATE is found for: {0}:".format(op_name))
 
     elif op_name in bool_func_dict.keys():
         count = 0
@@ -248,7 +246,7 @@ def __operator_to_java__(op_type, op_name, op_list):
             else:
                 res_str = res_str + tmp
     else:
-        print 1 / 0
+        raise RuntimeError("Unknown operation: {0}:".format(op_name))
 
     return res_str
 
@@ -287,7 +285,8 @@ def __where_convert_to_java__(exp, buf_dict):
                     op_type = tmp_exp.cons_type
 
             if len(tmp_list) != 2:
-                print 1 / 0
+                raise RuntimeError("Two parameters are expected for WHERE but {0} were found in {1}".format(len(tmp_list), exp))
+
 
             return_str = __operator_to_java__(op_type, exp.func_name, tmp_list)
 
@@ -319,7 +318,7 @@ def __where_convert_to_java__(exp, buf_dict):
                 if isinstance(para1, ystree.YRawColExp):
                     return_str += buf_dict[para1.table_name] + "[" + str(para1.column_name) + "]"
                 else:
-                    print 1 / 0
+                    raise RuntimeError("A column expression is expected but {0} found.", para1)
 
                 return_str += ".compareTo(\""
 
@@ -327,7 +326,7 @@ def __where_convert_to_java__(exp, buf_dict):
                     return_str += str(para2.cons_value)
                     return_str += "\") == 0"
                 else:
-                    print 1 / 0
+                    raise RuntimeError("A constant expression is expected but {0} found.", para1)
 
                 return_str += ")"
 
@@ -741,15 +740,14 @@ def __groupby_gen_mr__(tree, fo):
     line_buffer = "line_buf"
 
     if tree.select_list is None or tree.child.select_list is None:
-        print "select list in None  when generating code for groupby node"
-        print 1 / 0
+        raise RuntimeError("Select list in None for {0} when generating code for groupby node.".format(tree))
 
     buf_dict = {}
     for x in tree.child.table_list:
         buf_dict[x] = line_buffer
 
     if tree.group_by_clause is None:
-        print 1 / 0
+        raise RuntimeError("Group by clause is None for {0} when generating code for groupby node.".format(tree))
     else:
         gb_len = len(tree.group_by_clause.groupby_exp_list)
 
@@ -1083,7 +1081,7 @@ def __groupby_gen_mr__(tree, fo):
         for i in range(0, len(gb_exp_list)):
             exp = gb_exp_list[i]
             if not isinstance(exp, ystree.YFuncExp):
-                print 1 / 0
+                raise RuntimeError("".format(exp))
 
             tmp_name = ystree.__groupby_func_name__(exp)
             if tmp_name == "AVG":
@@ -1096,7 +1094,7 @@ def __groupby_gen_mr__(tree, fo):
         for i in range(0, len(gb_exp_list)):
             exp = gb_exp_list[i]
             if not isinstance(exp, ystree.YFuncExp):
-                print 1 / 0
+                raise RuntimeError("Expecting a function expression but found {}".format(exp))
 
             tmp_name = ystree.__groupby_func_name__(exp)
             if tmp_name == "AVG":
@@ -1251,7 +1249,7 @@ def __gen_func_exp__(exp, table_name):
         elif isinstance(x, ystree.YFuncExp):
             tmp_exp = __gen_func_exp__(x, table_name)
             if tmp_exp is None:
-                print 1 / 0
+                raise RuntimeError("Function expression for {0} in {1} is None".format(x, exp))
 
             new_list.append(tmp_exp)
         else:
@@ -1293,7 +1291,7 @@ def __gen_join_where__(cur_exp, table_name):
     if cur_exp.func_name in bool_func_dict.keys():
         for x in cur_exp.parameter_list:
             if not isinstance(x, ystree.YFuncExp):
-                print 1 / 0
+                raise RuntimeError("Function expression is expected but {0} found.".format(x))
 
             tmp_exp = __gen_join_where__(x, table_name)
 
@@ -1375,8 +1373,7 @@ def __join_gen_mr__(tree, left_name, fo):
     line_buffer = "line_buf"
 
     if tree.select_list is None:
-        print "Error when generating code for join node"
-        print 1 / 0
+        raise RuntimeError("Select list for {0} is None.".format(tree))
 
     self_join_bool = False
 
@@ -1408,7 +1405,7 @@ def __join_gen_mr__(tree, left_name, fo):
 
 
     if left_key_type != right_key_type:
-        print 1 / 0
+        raise RuntimeError("Join keys {0} and {1} do not the same type in {2}".format(left_key_type, right_key_type, tree))
 
     map_key_type = left_key_type
     map_value_type = "Text" # # we need to add tag to differentiate the data from left table and right table
@@ -1692,7 +1689,7 @@ def __join_gen_mr__(tree, left_name, fo):
 
             else:
                 if tree.select_list is None:
-                    print 1 / 0
+                    raise RuntimeError("Select list for {0} is None.".format(tree))
 
                 tmp_output = "context.write("
 
@@ -1720,7 +1717,7 @@ def __join_gen_mr__(tree, left_name, fo):
                 new_where = __gen_join_where__(tree.where_condition.where_condition_exp, "LEFT")
 
                 if new_where is None:
-                    print 1 / 0
+                    raise RuntimeError("Where condition for {0} is non".format(tree))
 
                 print >> fo, "\t\t\t\t\tif(" + __where_convert_to_java__(new_where, buf_dict) + "){\n"
 
@@ -1780,7 +1777,7 @@ def __join_gen_mr__(tree, left_name, fo):
 
             else:
                 if tree.select_list is None:
-                    print 1 / 0
+                    raise RuntimeError("Select list for {0} is None.".fromat(tree))
 
                 tmp_output = "context.write("
 
@@ -1807,7 +1804,7 @@ def __join_gen_mr__(tree, left_name, fo):
                 new_where = __gen_join_where__(tree.where_condition.where_condition_exp, "RIGHT")
 
                 if new_where is None:
-                    print 1 / 0
+                    raise RuntimeError("Where condition for {0} is None.".format(tree))
 
                 print >> fo, "\t\t\t\t\tif(" + __where_convert_to_java__(new_where, buf_dict) + "){\n"
 
@@ -1867,7 +1864,7 @@ def __join_gen_mr__(tree, left_name, fo):
 
         else:
             if tree.select_list is None:
-                print 1 / 0
+                raise RuntimeError("Select list for {0} is None.".format(tree))
 
             tmp_output = "context.write("
             tmp_output += "key_op"
@@ -2110,7 +2107,7 @@ def __composite_gen_mr__(tree, fo):
             for i in range(0, len(gb_exp_list)):
                 exp = gb_exp_list[i]
                 if not isinstance(exp, ystree.YFuncExp):
-                    print 1 / 0
+                    raise RuntimeError("A function expression is expected but {0} found.".format(exp))
                 tmp_output = __select_func_convert_to_java__(exp, buf_dict)
                 tmp_name = ystree.__groupby_func_name__(exp)
                 if tmp_name == "SUM" or tmp_name == "AVG":
@@ -2200,7 +2197,7 @@ def __composite_gen_mr__(tree, fo):
             for i in range(0, len(gb_exp_list)):
                 exp = gb_exp_list[i]
                 if not isinstance(exp, ystree.YFuncExp):
-                    print 1 / 0
+                    raise RuntimeError("A function expression is expected but {0} found.".format(exp))
 
                 tmp_name = ystree.__groupby_func_name__(exp)
                 if tmp_name == "AVG":
@@ -2366,8 +2363,7 @@ def __composite_gen_mr__(tree, fo):
                     print >> fo, "\t\t\t}"
 
                 else:
-                    print "Not Supported join type"
-                    print 1 / 0
+                    raise RuntimeError("Not Supported join type {0} in {1}.".format(join_type, x))
             else:
                 print >> fo, "\t\t\tfor(int i=0;i<" + tmp_left_array + ".size();i++){"
                 print >> fo, "\t\t\t\tString[] " + left_line_buffer + "=((String)" + tmp_left_array + ".get(i)).split(\"\\\|\");"
@@ -2401,7 +2397,7 @@ def __composite_gen_mr__(tree, fo):
                 index = tree.it_node_list.index(x.child)
                 tmp_gb_input = "it_output[" + str(index) + "]"
             else:
-                print 1 / 0
+                raise RuntimeError("Not Supported join type {0} in {1}.".format(join_type, x))
 
             gb_exp_list = []
             __get_gbexp_list__(x.select_list.tmp_exp_list, gb_exp_list)
@@ -2606,7 +2602,7 @@ def __composite_gen_mr__(tree, fo):
                 left_index = tree.it_node_list.index(x)
                 left_input = left_array + "_" + str(left_index)
             else:
-                print 1 / 0
+                raise RuntimeError("Unknown left child {0} for {1}.".format(x.left_child, x))
 
             if x.right_child in tree.it_node_list:
                 right_index = tree.it_node_list.index(x.right_child)
@@ -2618,7 +2614,7 @@ def __composite_gen_mr__(tree, fo):
                 right_index = tree.it_node_list.index(x)
                 right_input = right_array + "_" + str(right_index)
             else:
-                print 1 / 0
+                raise RuntimeError("Unknown right child {0} for {1}.".format(x.right_child, x))
 
             if x.join_explicit is True:
                 join_type = x.join_type.upper()
@@ -2685,8 +2681,7 @@ def __composite_gen_mr__(tree, fo):
                     print >> fo, "\t\t\t}"
 
                 else:
-                    print "Not supported yet"
-                    print 1 / 0
+                    raise RuntimeError("Not supported join type {0} for {1}}.".format(join_type, x))
             else:
                 reduce_value = __gen_mr_value__(x.select_list.tmp_exp_list, reduce_value_type, buf_dict)
                 print >> fo, "\t\t\tfor(int i=0;i<" + left_input + ".size();i++){"
