@@ -22,12 +22,20 @@ $ python setup.py install
 
 * An Example
 
-As an example:
-$ sq2mapred tests/ysmart/test/tpch_test/tpch18query.sql tests/ysmart/test/tpch_test/tpch18query.sql
+As an example for translating SQL to Hadoop jobs:
 
-This command saves the generated Hadoop jobs in the  ./result directory, which contains
-(1) the Java source codes in the ./result/YSmartCode. 
-(2) A ./result/testquery.script file that contains commands to compile and execute the generated Hadoop jobs.
+```bash
+
+$ sq2mapred.py tests/ysmart/test/tpch_test/tpch18query.sql tests/ysmart/test/tpch_test/tpch18query.sql
+```
+
+As an example for translating SQL to Spark jobs:
+
+```bash
+$ sq2spark.py tests/ysmart/test/tpch_test/tpch18query.sql tests/ysmart/test/tpch_test/tpch18query.sql
+```
+
+This command saves the generated Hadoop jobs or Spark jobs in the "./result" directory
 
 * Notes
 
