@@ -3520,7 +3520,7 @@ def __gen_func_index__(exp, table_list, table_alias_dict):
         for para in para_list:
             if isinstance(para, YRawColExp):
                 if para.column_name == "*":
-                    print  1 / 0
+                    raise RuntimeError("Invalid column name * for {0}".format(para))
                 if para.table_name in table_list:
                     new_para = __gen_column_index__(para, table_list, table_alias_dict)
                     if new_para is None:
